@@ -1,0 +1,442 @@
+""" Информация по доставке"""
+type ClaimDeliveryDto {
+  id: Long!
+  clientPartyId: String
+  courier: CourierDto
+  claim: ClaimDto
+  isActive: Boolean
+  cardNumber: String
+  accountNumber: String
+  comment: String
+  createdBy: String
+  createdDate: LocalDateTime
+  updatedBy: String
+  updatedDate: LocalDateTime
+  deleted: Boolean
+}
+
+""" Заявка"""
+type ClaimDto {
+  id: Long!
+  createdBy: String
+  createdDate: LocalDateTime
+  updatedBy: String
+  updatedDate: LocalDateTime
+  deleted: Boolean
+  clientSurname: String
+  clientName: String
+  clientPatronymic: String
+  passportPin: String
+  passportNumber: String
+  passportSeries: String
+  citizenship: String
+  mobileNumber: String
+  codeword: String
+  productAssociateId: Long
+  productAssociateDescription: String
+  branchCode: Int
+  branchName: String
+  areaCode: String
+  areaName: String
+  districtCode: String
+  districtName: String
+  deliveryAddress: String
+  embossingFirstName: String
+  embossingLastName: String
+  fullName: String
+  claimProcessInstanceId: String
+  isDelivery: Boolean
+  isActive: Boolean
+  isIssued: Boolean
+  deliveryDateTime: LocalDateTime
+
+  """ текущее состояние заявки (отсутствует в сущности) - из очереди с RB модулем
+  """
+  state: ProcessStateDto
+
+  """ для идентификации задач со статусами исправления и возврата (отсутствует в сущности)
+  """
+  isFix: Boolean
+}
+
+""" Все поля обязательны"""
+input ClaimInput {
+  id: Long!
+  deliveryAddress: String!
+  deliveryDateTime: LocalDateTime!
+  isDelivery: Boolean!
+  clientSurname: String!
+  clientName: String!
+  clientPatronymic: String!
+  passportPin: String!
+  passportNumber: String!
+  passportSeries: String!
+  citizenship: String!
+  mobileNumber: String!
+  embossingFirstName: String!
+  embossingLastName: String!
+}
+
+""" Вердикт сотрудника КЦ - все поля обязательны!"""
+input ClaimVerdictInput {
+  claimId: Long!
+  claimIsCorrect: VerdictEnum!
+  embossingFirstName: String
+  embossingLastName: String
+}
+
+""" Вывоз подробной информации по заявке с необходимыми вложениями в зависимости от роли
+"""
+type ClaimWithAttachmentsDto {
+  claim: ClaimDto
+  objects: [MediaObjectDto!]!
+}
+
+""" Курьер"""
+type CourierDto {
+  id: Long!
+  courierUsername: String!
+  courierPartyId: String!
+  createdBy: String
+  createdDate: LocalDateTime
+  updatedBy: String
+  updatedDate: LocalDateTime
+  deleted: Boolean
+}
+
+""" Обновление списка районов для курьеров"""
+input CourierInput {
+  courierUsername: String
+  courierPartyId: String!
+  districtCode: [String]
+}
+
+""" Курьер (данные из АБС)"""
+type CourierResponseDto {
+  fullName: String
+  birthDate: String
+  birthPlace: String
+  inn: String
+  paperSeries: String
+  paperNumber: String
+  paperIssuedDate: String
+  paperIssuer: String
+}
+
+""" Курьер с филиалами"""
+type CourierWithDistrictsDto {
+  courier: CourierDto!
+  districts: [DistrictsDto!]!
+}
+
+""" Районы"""
+type DistrictsDto {
+  districtCode: String
+  districtName: String
+}
+
+""""""
+scalar LocalDate
+
+""""""
+scalar LocalDateTime
+
+"""A 64-bit signed integer"""
+scalar Long
+
+""" Приложения к заявкам (для списка вложений)"""
+type MediaObjectDto {
+  id: Long!
+  objectName: String!
+  accessLink: String!
+  versionId: String!
+  userComment: String
+  createdBy: String
+  createdDateTime: LocalDateTime
+  replacementBy: String
+  replacementDateTime: LocalDateTime
+  type: TypeDto
+}
+
+""" Получение данных по объекту и самого объекта в Base64"""
+type MediaObjectResponseDto {
+  objectData: MediaObjectDto
+
+  """ BASE 64 отдаётся на фронт по запросу"""
+  object: String
+}
+
+""" Мутации"""
+type Mutation {
+  """ Принятие заявки в работу авторизованным пользователем (переход задачи из CREATED в ASSIGNED)
+  """
+  takingClaimToWork(claimId: Long!): String
+
+  """ Вынос вердикта сотрудником контакт-центра по заявке после сравнения данных из анкеты с фото паспорта (задача переходит в состояние COMPLETE)
+  """
+  claimVerdict(claimVerdictInput: ClaimVerdictInput!): String
+
+  """ Исправление ошибок в анкете и переход заявки к сбору паспортных данных клиента
+  """
+  updateClaim(claimInput: ClaimInput!): String
+
+  """ Передача карты на доставку менеджером КП (состояние заявки изменяется с CARD_RELEASED на CARD_SENT_FOR_DELIVERY) | Также карта переходит на доставку при считывании Excel файла
+  """
+  allowCardDelivery(claimId: Long!): String
+
+  """ Изменение курьера (указывается partyId курьера и список кодов районов к которым он будет прикреплён)
+  """
+  updateCourier(courierInput: CourierInput!): String
+
+  """ Взятие заявки в работу авторизованным курьером"""
+  takingCardForDelivery(claimId: Long!): String
+
+  """ Отказ от исполнения заявки по идентификатору заявки авторизованным курьером
+  """
+  refusalCardForDelivery(claimId: Long!): String
+
+  """ Подверждение исполнения доставки авторизованным курьером по идентификатору заявки при прибытии в филиал
+  """
+  arrivedAtBranchCardForDelivery(claimId: Long!): String
+
+  """ Изменение состояния карты в филиале для самовывоза сотрудниками контакт-центра и менеджерами | В случае необходимости  доставки - сотрудники КЦ/менеджеры меняют статус вручную
+  """
+  changeCardStateInBranch(claimId: Long!): String
+
+  """ [Админское API] Перезапуск остановленных сервисных задач"""
+  replayServiceTask(claimProcessInstanceId: String!): String
+}
+
+""" Возможные ранги документов"""
+enum ObjectRankEnum {
+  """
+  1 = "основные-документы", "main-documents"
+  """
+  MAIN_DOCUMENTS
+
+  """
+  2 = "дополнительные-документы", "additional-documents"
+  """
+  ADDITIONAL_DOCUMENTS
+}
+
+""" Запрос на пагинированный вывод"""
+input PaginatedRequestInput {
+  page: Int!
+  size: Int!
+}
+
+""" Запрос на пагинированный вывод по заявкам с фильтрацией данных"""
+input PaginatedRequestWithFilterInput {
+  page: Int!
+  size: Int!
+  startDate: LocalDate
+  endDate: LocalDate
+  states: [String]
+  districts: [String]
+}
+
+""" Пагинированный ответ по заявкам"""
+type PaginationResponseDto {
+  currentPage: Int!
+  elementsInCurrentPage: Int!
+  totalPages: Int!
+  totalElements: Long!
+  list: [ClaimDto]
+}
+
+""" Курьер (фулл)"""
+type PresentCourierDto {
+  courierAbsData: CourierResponseDto!
+  courierDeliveryData: CourierWithDistrictsDto!
+}
+
+""" Описание процесса"""
+type ProcessDefinitionDto {
+  id: Long!
+  createdBy: String
+  createdDate: LocalDateTime
+  updatedBy: String
+  updatedDate: LocalDateTime
+  deleted: Boolean
+  processDefinitionCode: String!
+  processDefinitionKey: String!
+  processDescription: String!
+}
+
+""" Состояния процесса"""
+type ProcessHistoryDto {
+  id: Long!
+  createdBy: String
+  createdDate: LocalDateTime
+  updatedBy: String
+  updatedDate: LocalDateTime
+  deleted: Boolean
+  state: ProcessStateDto
+  claim: ClaimDto
+}
+
+""" Состояния процесса"""
+type ProcessStateDto {
+  id: Long!
+  createdBy: String
+  createdDate: LocalDateTime
+  updatedBy: String
+  updatedDate: LocalDateTime
+  deleted: Boolean
+  processStateCode: String!
+  stateDescription: String!
+  color: String
+  isActive: Boolean
+  isErrorState: Boolean
+  processDefinition: ProcessDefinitionDto
+}
+
+""" Запросы"""
+type Query {
+  " Получение заявки по уникальному идентификатору независимо от состояния процесса с актуальными вложениями\n Если у заказа стоит isActive = false - то ничего нельзя с ним делать (не отображать никаких кнопок)\n ВРЕМЕННАЯ API"
+  getClaimByIdWithAttachments(claimId: Long!): ClaimWithAttachmentsDto
+
+  " Вывод полного списка заявок с фильтрацией и пагинацией данных | Фильтрация происходит по районам (кодам), состояниям процесса и датам ОТ - ДО\n Если у заказа стоит isActive = false - то ничего нельзя с ним делать (не отображать никаких кнопок)"
+  getClaims(paginatedRequest: PaginatedRequestWithFilterInput!): PaginationResponseDto
+
+  """ Получение актуальных вложений по идентификатору заявки для детального просмотра заявки
+  """
+  getAttachmentsByClaimId(claimId: Long!): [MediaObjectDto!]!
+
+  """ Вывод списка заявок, назначенных на группу кандидатов (задачи со статусом CREATED) и пагинация данных | В результате получаем список заявок для кандидатов (группы пользователя)
+  """
+  getNotAssignedClaims(paginatedRequest: PaginatedRequestInput!): PaginationResponseDto
+
+  """ Вывод списка заявок, выполняемых авторизованным пользователем (задачи со статусом ASSIGNED) и пагинация данных | В результате получаем список заявок для авторизованного пользователя
+  """
+  getInProgressClaims(paginatedRequest: PaginatedRequestInput!): PaginationResponseDto
+
+  """ Передача списка состояний бизнес процесса доставки банковских карт для получения заявок по состояниям
+  """
+  getProcessStates: [ProcessStateDto!]!
+
+  """ Получение полной истории заявки по идентификатору заявки (все пройденные процессы по идентификатору заявки)
+  """
+  getProcessHistory(claimId: Long!): [ProcessHistoryDto!]!
+
+  """ Вывод неактуальных вложений по идентификатору заявки (историзация вложений) | В результате получаем список неактуальных вложений по идентификатору заявки (без Base64) | Пользователь выбирает тип (отправляется codeType) по которому необходимо загрузить историю
+  """
+  getHistoryAttachments(claimId: Long!, typeCode: String!): [MediaObjectDto!]!
+
+  """ Поиск заявок по ФИО, номеру телефона, ИНН клиента, номеру паспорта во всех списках заявок
+  """
+  searchClaim(searchValue: String, paginatedRequest: PaginatedRequestInput!): PaginationResponseDto
+
+  """ Передача списка типов допустимых медиа объектов для сервиса доставки карт
+  """
+  getAttachmentTypes: [TypeDto!]!
+
+  """ Получение информации по объекту и сам объект в Base64 (для актуальных вложений)
+  """
+  getActualObjectData(fullPath: String!): MediaObjectResponseDto
+
+  """ Получение информации по объекту и сам объект в Base64 (для неактуальных вложений)
+  """
+  getHistoryObjectData(fullPath: String!, versionID: String!): MediaObjectResponseDto
+
+  """ Вывод готовых к выдаче карт (для отправки на доставку вручную, без загрузки Excel файла)
+  """
+  getCardReleased(paginatedRequest: PaginatedRequestInput!): PaginationResponseDto
+
+  """ Вывод выполненных заявок (завершённых доставок)"""
+  getCardDelivered(paginatedRequest: PaginatedRequestInput!): PaginationResponseDto
+
+  """ Вывод заявок ожидающих самовывоз (в филиале) | Их можно отправить на первичную/повторную доставку с помощью changeCardStateInBranch
+  """
+  getCardInBranch(paginatedRequest: PaginatedRequestInput!): PaginationResponseDto
+
+  """ Получение списка курьером по необходимому коду района (курьеры привязаны к районам) | Районы можно получить по REST API
+  """
+  getCouriersByDistrictCode(districtCode: String): [CourierWithDistrictsDto!]!
+
+  """ Предоставление детальной информации по курьеру для изменения филиалов (списка привязанных филиалов)
+  """
+  getCourierByPartyId(partyId: String!): PresentCourierDto!
+
+  """ Получение истории заявки по уникальному идентификатору для курьеров (независимо от района/филиала)
+  """
+  getHistoryByClaimIdForCourier(claimId: Long!): [ClaimDeliveryDto!]!
+
+  """ Получение активных заявок авторизованного курьера"""
+  getActiveClaims: [ClaimDto!]!
+
+  """ Получение всех заявок с возможностью фильтрации по районам (отображается название района, в качестве параметра передаётся код района) | Для вывода всех заказов параметр (код района) не передаются
+  """
+  getClaimsForCourier(districtCode: String): [ClaimDto!]!
+
+  """ Получение активных районов для курьера"""
+  getActiveDistricts: [DistrictsDto!]!
+
+  """ История выполненных заказов курьера"""
+  historyForCourier: [ClaimDeliveryDto!]!
+
+  """ Информация по авторизованному курьеру для личного кабинета пользователя
+  """
+  courierPersonalData: PresentCourierDto!
+
+  """ Получение информации по курсам валют"""
+  getRates: [RatesDataDto!]!
+
+  """ [Админское API] Получение ошибочных заявок (остановленных сервисных задач) для перезапуска
+  """
+  getErrorClaims: [ClaimDto!]!
+
+  """ Первичное получение заявки по уникальному идентификатору для пользователей ЕФР
+  """
+  getClaimById(claimId: Long!): ClaimDto
+
+  """ Первичное получение заявки по уникальному идентификатору для курьера"""
+  getClaimByIdForCourier(claimId: Long!): ClaimDto
+}
+
+""" Курсы валют"""
+type RateDto {
+  isoCode: String!
+  sellRate: String!
+  buyRate: String!
+}
+
+""" Список курсов валют (все показатели)"""
+type RatesDataDto {
+  type: String
+  rates: [RateDto!]
+}
+
+""" Подписки"""
+type Subscription {
+  " Получение заявки по уникальному идентификатору в реальном времени\n Если у заказа стоит isActive = false - ничего нельзя с ним делать (не отображать никаких кнопок)\n Фильтрация осуществляется по ID"
+  getClaimByIdSub(claimId: Long!): ClaimDto
+
+  " Получение заявки по уникальному идентификатору для курьеров (независимо от района/филиала) в реальном времени\n Если у заказа стоит isActive = false - ничего нельзя с ним делать (не отображать никаких кнопок)\n Фильтрация осуществляется по ID"
+  getClaimByIdForCourierSub(claimId: Long!): ClaimDto
+
+  " Получение заявки с возможностью фильтрации по районам (отображается название района, в качестве параметра передаётся код района)\n Для вывода всех заказов параметр (код района) не передаются\n Вывод в реальном времени для курьеров в мобильном приложении\n Если у заказа стоит isActive = false - ничего нельзя с ним делать (не отображать никаких кнопок)"
+  getClaimsForCourierSub(districtCode: String): ClaimDto
+}
+
+""" Типы допустимых медиа объектов"""
+type TypeDto {
+  id: Long!
+  typeName: String!
+  typeCode: String!
+  isActive: Boolean
+  objectRank: ObjectRankEnum
+}
+
+""" Возможные варианты вердиктов от контакт-центра"""
+enum VerdictEnum {
+  """1 - Данные корректны"""
+  CORRECT
+
+  """2 - Исправление ошибок в анкете"""
+  FIX
+
+  """3 - Несоответствие данных"""
+  DENIED
+}

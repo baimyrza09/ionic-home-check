@@ -1,0 +1,61 @@
+fragment ClaimDto on ClaimDto {
+  id
+  fullName
+  deliveryAddress
+  deliveryDateTime
+  state {
+    ...ProcessStateDto
+  }
+}
+
+fragment ClaimDtoDetails on ClaimDto {
+  id
+  fullName
+  passportPin
+  passportNumber
+  passportSeries
+  mobileNumber
+  branchName
+  deliveryAddress
+  deliveryDateTime
+  isActive
+  state {
+    ...ProcessStateDto
+  }
+}
+
+fragment ClaimDeliveryDto on ClaimDeliveryDto {
+  claim {
+    ...ClaimDto
+  }
+}
+
+fragment ClaimDeliveryDtoDetails on ClaimDeliveryDto {
+  id
+  claim {
+    ...ClaimDtoDetails
+  }
+  comment
+  createdBy
+  createdDate
+  updatedBy
+  updatedDate
+}
+
+fragment DistrictsDto on DistrictsDto {
+  districtCode
+  districtName
+}
+
+fragment RateDto on RateDto {
+  isoCode
+  sellRate
+  buyRate
+}
+
+fragment RatesDataDto on RatesDataDto {
+  type
+  rates {
+    ...RateDto
+  }
+}

@@ -1,0 +1,11 @@
+mutation takingCardForDelivery($claimId: Long!) {
+      takingCardForDelivery(claimId: $claimId)
+}
+
+mutation refusalCardForDelivery($claimId: Long!) {
+  refusalCardForDelivery(claimId: $claimId)
+}
+
+mutation arrivedAtBranchCardForDelivery($claimId: Long!) {
+  arrivedAtBranchCardForDelivery(claimId: $claimId)
+}

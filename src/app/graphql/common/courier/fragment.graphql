@@ -1,0 +1,29 @@
+fragment CourierDto on CourierDto {
+  id
+  courierUsername
+  courierPartyId
+}
+
+fragment CourierResponseDto on CourierResponseDto {
+  fullName
+  birthDate
+  inn
+}
+
+fragment CourierWithDistrictDto on CourierWithDistrictsDto {
+  courier {
+    ...CourierDto
+  }
+  districts {
+    ...DistrictsDto
+  }
+}
+
+fragment PresentCourierDto on PresentCourierDto {
+  courierAbsData {
+    ...CourierResponseDto
+  }
+  courierDeliveryData {
+    ...CourierWithDistrictDto
+  }
+}

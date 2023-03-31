@@ -1,0 +1,6 @@
+fragment ProcessStateDto on ProcessStateDto {
+  id
+  color
+  stateDescription
+  processStateCode
+}
