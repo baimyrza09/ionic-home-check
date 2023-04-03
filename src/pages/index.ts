@@ -3,6 +3,7 @@ import { RouteRecordRaw } from 'vue-router';
 import TabsPage from './TabsPage.vue';
 
 import FeatureAuthByLoginAndPassword from '@/features/auth/index.vue';
+import FeatureAuthByPinCode from '@/features/pin-code/index.vue';
 import guest from '@/app/middleware/guest';
 import auth from '@/app/middleware/auth';
 import middlewarePipeline from '@/app/middleware/middleware-pipline';
@@ -12,6 +13,14 @@ const routes: Array<RouteRecordRaw> = [
     path: '/auth',
     name: 'auth',
     component: FeatureAuthByLoginAndPassword,
+    meta: {
+      middleware: [guest],
+    },
+  },
+  {
+    path: '/pincode',
+    name: 'pincode',
+    component: FeatureAuthByPinCode,
     meta: {
       middleware: [guest],
     },

@@ -30,10 +30,10 @@ export async function getActiveClaims() {
   return response.getActiveClaims;
 }
 
-// export async function getClaimDetails(claimId: number) {
-//   const response = await sdk.getClaimByIdForCourier({ claimId });
-//   return response.getClaimByIdForCourier;
-// }
+export async function getClaimDetails(claimId: number) {
+  const response = await sdk.getClaimByIdForCourier({ claimId });
+  return response.getClaimByIdForCourier;
+}
 
 export async function getDistricts() {
   const response = await sdk.getActiveDistricts();

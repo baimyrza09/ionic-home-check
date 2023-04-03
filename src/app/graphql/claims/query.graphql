@@ -10,11 +10,11 @@ query getActiveClaims {
   }
 }
 
-#query getClaimByIdForCourier($claimId: Long!) {
-#  getClaimByIdForCourier(claimId: $claimId) {
-#    ...ClaimDtoDetails
-#  }
-#}
+query getClaimByIdForCourier($claimId: Long!) {
+  getClaimByIdForCourier(claimId: $claimId) {
+    ...ClaimDtoDetails
+  }
+}
 
 query getActiveDistricts {
   getActiveDistricts {

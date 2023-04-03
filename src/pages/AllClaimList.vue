@@ -25,7 +25,7 @@
         </ion-item>
       </ion-list>
       <ion-list :inset="true" lines="none" style="background-color: #f4f5f8 !important">
-        <ion-item v-for="claim in claims" :key="claim.id" button class="custom-item">
+        <ion-item v-for="claim in claims" :key="claim.id" button class="custom-item" @click="goToClaim(e, claim)">
           <ion-label slot="start">
             <h3>{{ claim.fullName }}</h3>
             <p>{{ claim.deliveryAddress }}</p>
@@ -145,7 +145,11 @@ export default defineComponent({
     };
 
     const goToClaim = (_: Event, claim: ClaimDtoFragment) => {
-      router.push({ name: 'ClaimDetails', params: { id: claim.id }, query: { claimType: ClaimType.ACTIVE_CLAIM } });
+      router.push({
+        name: 'claim-details',
+        params: { id: claim.id },
+        query: { claimType: ClaimType.NOT_ACTIVE_CLAIM },
+      });
     };
 
     return {

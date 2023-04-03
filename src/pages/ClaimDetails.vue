@@ -3,183 +3,161 @@
     <ion-header>
       <ion-toolbar>
         <ion-buttons slot="start">
-          <ion-back-button default-href="#"></ion-back-button>
+          <ion-back-button default-href="#" @click="goBack"></ion-back-button>
         </ion-buttons>
-        <ion-title>Мои заявки</ion-title>
+        <ion-title>Детали заявки</ion-title>
       </ion-toolbar>
     </ion-header>
 
     <list-skeleton v-if="loadingSuccess && !claim" :rows="15" />
     <ion-content v-else>
-      <ion-card class="q-pa-sm q-mb-md no-shadow">
-        <ion-list lines="none">
-          <ion-item>
-            <ion-label>
-              <h3 class="text-weight-bold">Данные клиента</h3>
-            </ion-label>
+      <!--      <ion-card>-->
+      <ion-list lines="none">
+        <ion-item>
+          <ion-label>
+            <h3 class="text-weight-bold">Данные клиента</h3>
+          </ion-label>
 
-            <ion-label>
-              <h3 :class="getStateColor">
-                {{ claim?.state?.stateDescription }}
-              </h3>
-            </ion-label>
-          </ion-item>
+          <ion-label>
+            <h3 :class="getStateColor">
+              {{ claim?.state?.stateDescription }}
+            </h3>
+          </ion-label>
+        </ion-item>
 
-          <ion-item class="q-mt-md">
-            <ion-label>
-              <p class="text-grey-6">ФИО:</p>
-            </ion-label>
-            <ion-label>
-              <h3>{{ claim?.fullName }}</h3>
-            </ion-label>
-          </ion-item>
+        <ion-item>
+          <ion-label>
+            <p class="text-grey-6">ФИО:</p>
+          </ion-label>
+          <ion-label>
+            <h3>{{ claim?.fullName }}</h3>
+          </ion-label>
+        </ion-item>
 
-          <ion-item class="q-mt-md">
-            <ion-label>
-              <p class="text-grey-6">Номер документа:</p>
-            </ion-label>
-            <ion-label>
-              <h3>{{ claim?.passportSeries }} {{ claim?.passportNumber }}</h3>
-            </ion-label>
-          </ion-item>
+        <ion-item>
+          <ion-label>
+            <p class="text-grey-6">Номер документа:</p>
+          </ion-label>
+          <ion-label>
+            <h3>{{ claim?.passportSeries }} {{ claim?.passportNumber }}</h3>
+          </ion-label>
+        </ion-item>
 
-          <ion-item class="q-mt-md">
-            <ion-label>
-              <p class="text-grey-6">ИНН:</p>
-            </ion-label>
-            <ion-label>
-              <h3>{{ claim?.passportPin }}</h3>
-            </ion-label>
-          </ion-item>
+        <ion-item>
+          <ion-label>
+            <p class="text-grey-6">ИНН:</p>
+          </ion-label>
+          <ion-label>
+            <h3>{{ claim?.passportPin }}</h3>
+          </ion-label>
+        </ion-item>
 
-          <ion-item class="q-mt-md">
-            <ion-label>
-              <p class="text-grey-6">Номер телефона:</p>
-            </ion-label>
-            <ion-label>
-              <h3>{{ claim?.mobileNumber }}</h3>
-            </ion-label>
-          </ion-item>
+        <ion-item>
+          <ion-label>
+            <p class="text-grey-6">Номер телефона:</p>
+          </ion-label>
+          <ion-label>
+            <h3>{{ claim?.mobileNumber }}</h3>
+          </ion-label>
+        </ion-item>
 
-          <ion-item class="q-mt-md">
-            <ion-label>
-              <h3 class="text-weight-bold">Данные о доставке</h3>
-            </ion-label>
-          </ion-item>
+        <ion-item>
+          <ion-label>
+            <h3 class="text-weight-bold">Данные о доставке</h3>
+          </ion-label>
+        </ion-item>
 
-          <ion-item class="q-mt-md">
-            <ion-label>
-              <p class="text-grey-6">Номер заказа:</p>
-            </ion-label>
-            <ion-label>
-              <h3>{{ claim?.id }}</h3>
-            </ion-label>
-          </ion-item>
+        <ion-item>
+          <ion-label>
+            <p class="text-grey-6">Номер заказа:</p>
+          </ion-label>
+          <ion-label>
+            <h3>{{ claim?.id }}</h3>
+          </ion-label>
+        </ion-item>
 
-          <ion-item class="q-mt-md">
-            <ion-label>
-              <p class="text-grey-6">Филиал:</p>
-            </ion-label>
-            <ion-label>
-              <h3>{{ claim?.branchName }}</h3>
-            </ion-label>
-          </ion-item>
+        <ion-item>
+          <ion-label>
+            <p class="text-grey-6">Филиал:</p>
+          </ion-label>
+          <ion-label>
+            <h3>{{ claim?.branchName }}</h3>
+          </ion-label>
+        </ion-item>
 
-          <ion-item class="q-mt-md">
-            <ion-label>
-              <p class="text-grey-6">Адрес доставки:</p>
-            </ion-label>
-            <ion-label>
-              <h3>{{ claim?.deliveryAddress }}</h3>
-            </ion-label>
-          </ion-item>
+        <ion-item>
+          <ion-label>
+            <p class="text-grey-6">Адрес доставки:</p>
+          </ion-label>
+          <ion-label>
+            <h3>{{ claim?.deliveryAddress }}</h3>
+          </ion-label>
+        </ion-item>
 
-          <ion-item class="q-mt-md">
-            <ion-label>
-              <p class="text-grey-6">Желаемое время доставки:</p>
-            </ion-label>
-            <ion-label>
-              <h3>{{ claim?.deliveryDateTime }}</h3>
-            </ion-label>
-          </ion-item>
+        <ion-item>
+          <ion-label>
+            <p class="text-grey-6">Желаемое время доставки:</p>
+          </ion-label>
+          <ion-label>
+            <h3>{{ claim?.deliveryDateTime }}</h3>
+          </ion-label>
+        </ion-item>
 
-          <ion-item v-if="isShowCommentField">
-            <ion-label>
-              <ion-textarea
-                v-model="comment"
-                ref="commentField"
-                label="Напишите комментарий"
-                outlined
-                color="negative"
-              />
-            </ion-label>
-          </ion-item>
+        <ion-item v-if="isShowCommentField">
+          <ion-label>
+            <ion-textarea v-model="comment" ref="commentField" label="Напишите комментарий" outlined color="negative" />
+          </ion-label>
+        </ion-item>
 
-          <div v-if="isShowPhotoBtn" align="center">
-            <ion-button type="submit" color="negative" @click="takePicture">Загрузить фото</ion-button>
-          </div>
+        <div v-if="isShowPhotoBtn" class="ion-text-center">
+          <ion-button type="submit" color="success" @click="takePicture">Загрузить фото</ion-button>
+          <!--            <ion-button type="submit" color="negative" @click="toast">Toast</ion-button>-->
+        </div>
 
-          <ion-item v-if="imageBase64" class="ion-margin-top">
-            <ion-img class="rounded-borders" :src="`data:image/png;base64,${imageBase64}`" />
-          </ion-item>
+        <ion-item v-if="imageBase64" class="ion-margin-top">
+          <ion-img class="rounded-borders" :src="`data:image/png;base64,${imageBase64}`" />
+        </ion-item>
 
-          <div class="ion-margin-top" vertical align="center">
+        <div class="ion-margin-top ion-margin-bottom ion-text-center">
+          <ion-button v-if="!isActiveClaim" color="success" @click="takeClaim">Взять в работу</ion-button>
+
+          <ion-button v-if="isClaimWasTakenByCourier" color="success" @click="arrivedAtBranch"
+            >Подтвердить доставку</ion-button
+          >
+
+          <ion-button
+            v-if="isClaimWasTakenByCourier"
+            color="negative"
+            :loading="loadingFail"
+            :disable="disableFail"
+            padding="5px 15px"
+            @click="refuseDelivery"
+            >Отменить доставку</ion-button
+          >
+
+          <div>
             <ion-button
-              v-if="!isActiveClaim"
-              color="positive"
-              padding="5px 15px"
-              :loading="loadingSuccess"
-              @click="takeClaim"
-              >Взять в работу</ion-button
-            >
-
-            <ion-button
-              v-if="isClaimWasTakenByCourier"
-              color="positive"
-              class="q-mb-sm"
-              padding="5px 15px"
-              :loading="loadingSuccess"
-              :disable="disableSuccess"
-              @click="arrivedAtBranch"
-              >Подтвердить доставку</ion-button
-            >
-
-            <ion-button
-              v-if="isClaimWasTakenByCourier"
+              v-if="isCardAwaitingCardDelivery"
+              icon="close"
+              type="submit"
               color="negative"
-              :loading="loadingFail"
-              :disable="disableFail"
-              padding="5px 15px"
-              @click="refuseDelivery"
-              >Отменить доставку</ion-button
+              @click="completeCardDelivery(false)"
+              >Не доставлена</ion-button
             >
 
-            <div>
-              <ion-button
-                v-if="isCardAwaitingCardDelivery"
-                icon="close"
-                type="submit"
-                color="negative"
-                :loading="loadingFail"
-                :disable="disableFail"
-                @click="completeCardDelivery(false)"
-                >Не доставлена</ion-button
-              >
-
-              <ion-button
-                v-if="isCardAwaitingCardDelivery"
-                color="positive"
-                icon="done"
-                class="q-ml-md"
-                :disable="disableSuccess"
-                :loading="loadingSuccess"
-                @click="completeCardDelivery(true)"
-                >Доставлена</ion-button
-              >
-            </div>
+            <ion-button
+              v-if="isCardAwaitingCardDelivery"
+              color="success"
+              icon="done"
+              :disable="disableSuccess"
+              :loading="loadingSuccess"
+              @click="completeCardDelivery(true)"
+              >Доставлена</ion-button
+            >
           </div>
-        </ion-list>
-      </ion-card>
+        </div>
+      </ion-list>
+      <!--      </ion-card>-->
     </ion-content>
   </ion-page>
 </template>
@@ -211,6 +189,9 @@ import {
   refusalCardForDelivery,
   takingCardForDelivery,
 } from '@/shared/services/claims/services';
+import { showNotification, showDialog } from '@/shared/lib/use-dialog';
+
+import { getClaimDetails } from '@/shared/services/claims/services';
 import { ClaimDtoDetailsFragment } from '@/app/graphql';
 
 import ListSkeleton from '@/shared/ui/skeleton/ListSkeleton.vue';
@@ -231,7 +212,7 @@ export default defineComponent({
     IonTextarea,
     IonImg,
     IonList,
-    IonCard,
+    // IonCard,
     IonContent,
   },
   setup() {
@@ -278,9 +259,9 @@ export default defineComponent({
     const getClaim = async () => {
       try {
         loadingSuccess.value = true;
-        // claim.value = await getClaimDetails(Number(route.params.id));
+        claim.value = await getClaimDetails(Number(route.params.id));
       } catch (e: any) {
-        console.log(e);
+        await showDialog();
       } finally {
         loadingSuccess.value = false;
       }
@@ -296,10 +277,10 @@ export default defineComponent({
         if (!response) {
           return;
         }
-        // showNotification(response, 'positive', 4000);
+        await showNotification(response, 'bottom', 'success');
         router.back();
       } catch (e: any) {
-        console.log(e);
+        await showDialog();
       } finally {
         loadingSuccess.value = false;
       }
@@ -316,10 +297,10 @@ export default defineComponent({
         if (!response) {
           return;
         }
-        // showNotification(response, 'positive', 4000);
+        await showNotification(response, 'bottom', 'success');
         router.back();
       } catch (e: any) {
-        console.log(e);
+        await showDialog();
       } finally {
         loadingFail.value = false;
         disableSuccess.value = false;
@@ -336,10 +317,10 @@ export default defineComponent({
         if (!response) {
           return;
         }
-        // showNotification(response, 'positive', 4000);
+        await showNotification(response, 'bottom', 'success');
         router.back();
       } catch (e: any) {
-        console.log(e);
+        await showDialog();
       } finally {
         loadingSuccess.value = false;
         disableFail.value = false;
@@ -350,7 +331,7 @@ export default defineComponent({
       try {
         if (isSuccess) {
           if (!imageBase64.value) {
-            // showNotification('Загрузите фото клиента для завершения заказа!', 'negative');
+            await showNotification('Загрузите фото клиента для завершения заказа!', 'bottom', 'negative');
             return;
           }
           loadingSuccess.value = true;
@@ -363,11 +344,11 @@ export default defineComponent({
           if (!response) {
             return;
           }
-          // showNotification(response.message, 'positive', 4000);
+          await showNotification(response.message, 'bottom', 'success');
           router.back();
         } else {
           if (!comment.value) {
-            // showNotification('Напишите комментарий для завершения заказа!', 'negative');
+            await showNotification('Напишите комментарий для завершения заказа!', 'bottom', 'negative');
             return;
           }
           loadingFail.value = true;
@@ -380,12 +361,12 @@ export default defineComponent({
           if (!response) {
             return;
           }
-          // showNotification(response.message, 'warning', 4000);
+          await showNotification(response.message, 'bottom', 'warning');
           router.back();
         }
         await getClaim();
       } catch (e: any) {
-        console.log(e);
+        await showDialog();
       } finally {
         loadingSuccess.value = false;
         disableFail.value = false;

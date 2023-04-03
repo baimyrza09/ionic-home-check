@@ -1,7 +1,7 @@
 <template>
-  <ion-menu side="end" class="custom" content-id="main-content">
-    <ion-content class="ion-padding"> </ion-content>
-  </ion-menu>
+  <!--  <ion-menu side="end" class="custom" content-id="main-content">-->
+  <!--    <ion-content class="ion-padding"> </ion-content>-->
+  <!--  </ion-menu>-->
   <ion-page id="main-content">
     <ion-tabs>
       <ion-router-outlet></ion-router-outlet>

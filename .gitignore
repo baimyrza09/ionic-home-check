@@ -31,6 +31,4 @@ npm-debug.log*
 /platforms
 /plugins
 /www
-/src/app/graphql/schema.graphql
-/src/app/graphql/sdk.ts
-/src/app/graphql/token.json
+

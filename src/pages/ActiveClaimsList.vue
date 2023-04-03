@@ -3,7 +3,6 @@
     <ion-header>
       <ion-toolbar>
         <ion-title>Мои заявки</ion-title>
-        <ion-button @click="quit">Logout</ion-button>
       </ion-toolbar>
     </ion-header>
     <list-skeleton v-if="loading" :rows="15" />
@@ -52,7 +51,6 @@ import {
 
 import { getActiveClaims, ClaimType, ProcessStateCodes } from '@/shared/services/claims/services';
 import { ClaimDtoFragment } from '@/app/graphql';
-import { logout } from '@/shared/services/auth/service';
 import { useRouter } from 'vue-router';
 import ListSkeleton from '@/shared/ui/skeleton/ListSkeleton.vue';
 import IconStatus from '@/shared/assets/IconStatus.vue';
@@ -116,17 +114,11 @@ export default defineComponent({
       router.push({ name: 'claim-details', params: { id: claim.id }, query: { claimType: ClaimType.ACTIVE_CLAIM } });
     };
 
-    const quit = async () => {
-      await logout();
-      await router.push('auth');
-    };
-
     return {
       getAssignedClaims,
       goToClaim,
       isShowDeliveryIcon,
       handleRefresh,
-      quit,
       claims,
       loading,
       ProcessStateCodes,
