@@ -22,3 +22,6 @@ GRAPHQL_SCHEMA_PATH=./src/requests/schema.graphql
 AUTH_URL=https://keycloak.optimabank.kg/auth
 REALM=crm-test
 CLIENT_ID=crm-app
+
+
+https://github.com/kristianaars/IDATT2105-A2-VueCalculator/blob/master/src/components/Calculator.vue
