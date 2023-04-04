@@ -1,43 +1,62 @@
 <template>
-  <ion-page class="ion-padding-horizontal ion-padding-bottom">
-    <form class="ion-text-center">
+  <ion-page class="ion-padding-horizontal ion-padding-bottom ion-justify-content-center">
+    <div class="ion-text-center">
       <vue3-otp-input
         v-model:value="bindValue"
         ref="otpInput"
         input-classes="otp-input"
         :conditional-class="['one', 'two', 'three', 'four']"
-        separator=""
         input-type="password"
+        class="otp-password"
         :num-inputs="4"
         :should-auto-focus="true"
-        :placeholder="['*', '*', '*', '*']"
-        @on-change="handleOnChange"
+        :placeholder="['', '', '', '']"
         @on-complete="handleOnComplete"
       />
       <ion-grid>
         <ion-row>
-          <ion-col size="4" size-md="4" size-lg="2"><ion-button size="large" color="light">1</ion-button></ion-col>
-          <ion-col size="4" size-md="4" size-lg="2"><ion-button size="large" color="light">2</ion-button></ion-col>
-          <ion-col size="4" size-md="4" size-lg="2"><ion-button size="large" color="light">3</ion-button></ion-col>
-          <ion-col size="4" size-md="4" size-lg="2"><ion-button size="large" color="light">4</ion-button></ion-col>
-          <ion-col size="4" size-md="4" size-lg="2"><ion-button size="large" color="light">5</ion-button></ion-col>
-          <ion-col size="4" size-md="4" size-lg="2"><ion-button size="large" color="light">6</ion-button></ion-col>
-          <ion-col size="4" size-md="4" size-lg="2"><ion-button size="large" color="light">7</ion-button></ion-col>
-          <ion-col size="4" size-md="4" size-lg="2"><ion-button size="large" color="light">8</ion-button></ion-col>
-          <ion-col size="4" size-md="4" size-lg="2"><ion-button size="large" color="light">9</ion-button></ion-col>
-          <ion-col size="4" size-md="4" size-lg="2">
-            <ion-button size="large" color="dark" fill="clear">
+          <ion-col size="4" size-md="4" size-lg="4"
+            ><ion-button class="custom-btn" color="light" @click="appendToDisplay('1')">1</ion-button></ion-col
+          >
+          <ion-col size="4" size-md="4" size-lg="4"
+            ><ion-button class="custom-btn" color="light" @click="appendToDisplay('2')">2</ion-button></ion-col
+          >
+          <ion-col size="4" size-md="4" size-lg="4"
+            ><ion-button class="custom-btn" color="light" @click="appendToDisplay('3')">3</ion-button></ion-col
+          >
+          <ion-col size="4" size-md="4" size-lg="4"
+            ><ion-button class="custom-btn" color="light" @click="appendToDisplay('4')">4</ion-button></ion-col
+          >
+          <ion-col size="4" size-md="4" size-lg="4"
+            ><ion-button class="custom-btn" color="light" @click="appendToDisplay('5')">5</ion-button></ion-col
+          >
+          <ion-col size="4" size-md="4" size-lg="4"
+            ><ion-button class="custom-btn" color="light" @click="appendToDisplay('6')">6</ion-button></ion-col
+          >
+          <ion-col size="4" size-md="4" size-lg="4"
+            ><ion-button class="custom-btn" color="light" @click="appendToDisplay('7')">7</ion-button></ion-col
+          >
+          <ion-col size="4" size-md="4" size-lg="4"
+            ><ion-button class="custom-btn" color="light" @click="appendToDisplay('8')">8</ion-button></ion-col
+          >
+          <ion-col size="4" size-md="4" size-lg="4"
+            ><ion-button class="custom-btn" color="light" @click="appendToDisplay('9')">9</ion-button></ion-col
+          >
+          <ion-col size="4" size-md="4" size-lg="4">
+            <ion-button color="dark" fill="clear">
               <ion-icon slot="icon-only" :icon="fingerPrintOutline"></ion-icon> </ion-button
           ></ion-col>
-          <ion-col size="4" size-md="4" size-lg="2"><ion-button size="large" color="light">0</ion-button></ion-col>
-          <ion-col size="4" size-md="4" size-lg="2">
-            <ion-button color="light">
+          <ion-col size="4" size-md="4" size-lg="4"
+            ><ion-button class="custom-btn" color="light" @click="appendToDisplay('0')">0</ion-button></ion-col
+          >
+          <ion-col size="4" size-md="4" size-lg="4">
+            <ion-button color="light" @click="backspaceBtn">
               <ion-icon slot="icon-only" :icon="backspace"></ion-icon>
             </ion-button>
           </ion-col>
         </ion-row>
       </ion-grid>
-    </form>
+    </div>
   </ion-page>
 </template>
 
@@ -64,12 +83,20 @@ export default defineComponent({
       // checkCredential();
     });
 
+    const appendToDisplay = (char: string) => {
+      if (bindValue.value.length === 4) {
+        return;
+      }
+      bindValue.value += char;
+      console.log(bindValue.value);
+    };
+
+    const backspaceBtn = () => {
+      bindValue.value = (bindValue.value + '').slice(0, -1);
+    };
+
     const handleOnComplete = (value: string) => {
       console.log('OTP completed: ', value);
-      console.log('OTP v-model:value: ', unref(bindValue));
-    };
-    const handleOnChange = (value: string) => {
-      console.log('OTP changed: ', value);
       console.log('OTP v-model:value: ', unref(bindValue));
     };
 
@@ -123,8 +150,9 @@ export default defineComponent({
     };
 
     return {
+      appendToDisplay,
+      backspaceBtn,
       handleOnComplete,
-      handleOnChange,
       bindValue,
       fingerPrintOutline,
       backspace,
@@ -133,35 +161,18 @@ export default defineComponent({
 });
 </script>
 
-<style>
-.otp-input {
-  width: 40px;
-  height: 40px;
-  padding: 5px;
-  margin: 0 10px;
-  font-size: 20px;
-  border-radius: 4px;
-  border: 1px solid rgba(0, 0, 0, 0.3);
-  text-align: center;
-}
-.otp-input.is-complete {
-  background-color: #e4e4e4;
-}
-.otp-input.error {
-  border: 1px solid red !important;
-}
-.otp-input::-webkit-inner-spin-button,
-.otp-input::-webkit-outer-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-input::placeholder {
-  font-size: 15px;
-  text-align: center;
-  font-weight: 600;
+<style scoped>
+.otp-password {
+  margin-bottom: 50px;
 }
 
 ion-button {
   --border-radius: 50%;
+  width: 4.5rem;
+  height: 4.5rem;
+}
+
+ion-button.custom-btn {
+  font-size: 2rem;
 }
 </style>

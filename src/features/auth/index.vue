@@ -56,10 +56,6 @@ export default defineComponent({
     const showPsw = ref(false);
     const isValid = computed(() => userPassword.value.length && userLogin.value.length);
 
-    onMounted(() => {
-      checkCredential();
-    });
-
     const loginKeyClock = async () => {
       try {
         await showLoading();
@@ -87,13 +83,7 @@ export default defineComponent({
         username: username,
         password: password,
         server: 'server',
-      })
-        .then((res) => {
-          alert(res);
-        })
-        .catch((e) => {
-          alert(e);
-        });
+      });
     };
 
     const showLoading = async () => {
@@ -108,41 +98,6 @@ export default defineComponent({
 
     const hideLoading = async () => {
       await loadingController.dismiss();
-    };
-
-    const checkCredential = () => {
-      NativeBiometric.isAvailable()
-        .then((result: AvailableResult) => {
-          const isAvailable = result.isAvailable;
-
-          // if (isAvailable) {
-          //   NativeBiometric.getCredentials({
-          //     server: '',
-          //   })
-          //     .then((credentials) => {
-          NativeBiometric.verifyIdentity({
-            reason: 'Вход по отпечатку пальца',
-            title: 'Приложите палец, чтобы войти в приложение',
-            subtitle: 'Scan your fingerprint',
-          })
-            .then(async () => {
-              const res = await login('delivery_courier', 'test');
-              if (res) {
-                await router.push('/');
-              }
-            })
-            .catch((e) => {
-              alert(e);
-            });
-          // })
-          // .catch((e) => {
-          //   alert(e);
-          // });
-          // }
-        })
-        .catch((e) => {
-          alert(e);
-        });
     };
 
     return {

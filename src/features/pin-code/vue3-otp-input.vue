@@ -24,7 +24,7 @@ export default /* #__PURE__ */ defineComponent({
     },
     separator: {
       type: String,
-      default: '**',
+      default: '',
     },
     inputClasses: {
       type: [String, Array] as PropType<string[] | string>,
