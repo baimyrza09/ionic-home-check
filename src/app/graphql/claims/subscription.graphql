@@ -1,5 +1,5 @@
-#subscription getClaimByIdForCourier($id: Long!) {
-#    getClaimByIdForCourier(party: $id) {
-#        ...ClaimDtoDetails
-#    }
-#}
+subscription getClaimByIdForCourierSub($claimId: Long!) {
+    getClaimByIdForCourierSub(claimId: $claimId) {
+        ...ClaimDtoDetails
+    }
+}

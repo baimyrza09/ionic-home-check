@@ -687,6 +687,13 @@ export type GetRatesQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type GetRatesQuery = { __typename?: 'Query', getRates: Array<{ __typename?: 'RatesDataDto', type: string | null, rates: Array<{ __typename?: 'RateDto', isoCode: string, sellRate: string, buyRate: string }> | null }> };
 
+export type GetClaimByIdForCourierSubSubscriptionVariables = Exact<{
+  claimId: Scalars['Long'];
+}>;
+
+
+export type GetClaimByIdForCourierSubSubscription = { __typename?: 'Subscription', getClaimByIdForCourierSub: { __typename?: 'ClaimDto', id: number, fullName: string | null, passportPin: string | null, passportNumber: string | null, passportSeries: string | null, mobileNumber: string | null, branchName: string | null, deliveryAddress: string | null, deliveryDateTime: string | null, isActive: boolean | null, state: { __typename?: 'ProcessStateDto', id: number, color: string | null, stateDescription: string, processStateCode: string } | null } | null };
+
 export type CourierDtoFragment = { __typename?: 'CourierDto', id: number, courierUsername: string, courierPartyId: string };
 
 export type CourierResponseDtoFragment = { __typename?: 'CourierResponseDto', fullName: string | null, birthDate: string | null, inn: string | null };
@@ -879,6 +886,13 @@ export const GetRatesDocument = gql`
   }
 }
     ${RatesDataDtoFragmentDoc}`;
+export const GetClaimByIdForCourierSubDocument = gql`
+    subscription getClaimByIdForCourierSub($claimId: Long!) {
+  getClaimByIdForCourierSub(claimId: $claimId) {
+    ...ClaimDtoDetails
+  }
+}
+    ${ClaimDtoDetailsFragmentDoc}`;
 export const GetCourierPersonalDataDocument = gql`
     query getCourierPersonalData {
   courierPersonalData {
@@ -923,6 +937,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     getRates(variables?: GetRatesQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetRatesQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetRatesQuery>(GetRatesDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'getRates', 'query');
+    },
+    getClaimByIdForCourierSub(variables: GetClaimByIdForCourierSubSubscriptionVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetClaimByIdForCourierSubSubscription> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetClaimByIdForCourierSubSubscription>(GetClaimByIdForCourierSubDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'getClaimByIdForCourierSub', 'subscription');
     },
     getCourierPersonalData(variables?: GetCourierPersonalDataQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetCourierPersonalDataQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetCourierPersonalDataQuery>(GetCourierPersonalDataDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'getCourierPersonalData', 'query');

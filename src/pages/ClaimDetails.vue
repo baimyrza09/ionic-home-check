@@ -179,7 +179,7 @@ import {
   IonCard,
   IonContent,
 } from '@ionic/vue';
-import { computed, defineComponent, onMounted, ref } from 'vue';
+import { computed, defineComponent, onMounted, onUnmounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { Camera, CameraResultType } from '@capacitor/camera';
 import {
@@ -195,6 +195,8 @@ import { getClaimDetails } from '@/shared/services/claims/services';
 import { ClaimDtoDetailsFragment } from '@/app/graphql';
 
 import ListSkeleton from '@/shared/ui/skeleton/ListSkeleton.vue';
+import { listenClaim } from '@/shared/services/subscriptions/service';
+import { userStore } from '@/app/stores';
 
 export default defineComponent({
   name: 'ClaimDetails',
@@ -218,6 +220,7 @@ export default defineComponent({
   setup() {
     const route = useRoute();
     const router = useRouter();
+    const store = userStore();
     const claim = ref<ClaimDtoDetailsFragment | null>(null);
     const photo = ref<File>();
     const comment = ref('');
@@ -228,6 +231,9 @@ export default defineComponent({
     const disableFail = ref(false);
 
     const imageBase64 = ref('');
+
+    // eslint-disable-next-line @typescript-eslint/ban-types
+    const unsubscribe = ref<Function>();
 
     const isShowPhotoBtn = computed(
       () => isCardAwaitingCardDelivery.value && route.query?.claimType === 'active-claim'
@@ -252,8 +258,24 @@ export default defineComponent({
     });
     const getStateColor = computed(() => `text-${claim?.value?.state?.color} text-weight-bold`);
 
+    watch(
+      () => store.claim,
+      (claimSub) => {
+        claim.value = claimSub;
+      }
+    );
+
     onMounted(async () => {
       await getClaim();
+      if (!claim.value) {
+        return;
+      }
+      unsubscribe.value = await listenClaim(claim?.value?.id);
+    });
+
+    onUnmounted(() => {
+      if (!unsubscribe.value) return;
+      unsubscribe.value();
     });
 
     const getClaim = async () => {
@@ -278,7 +300,6 @@ export default defineComponent({
           return;
         }
         await showNotification(response, 'bottom', 'success');
-        router.back();
       } catch (e: any) {
         await showDialog();
       } finally {
@@ -298,7 +319,6 @@ export default defineComponent({
           return;
         }
         await showNotification(response, 'bottom', 'success');
-        router.back();
       } catch (e: any) {
         await showDialog();
       } finally {
@@ -318,7 +338,6 @@ export default defineComponent({
           return;
         }
         await showNotification(response, 'bottom', 'success');
-        router.back();
       } catch (e: any) {
         await showDialog();
       } finally {

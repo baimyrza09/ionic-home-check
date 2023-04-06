@@ -10,6 +10,10 @@ const config: CapacitorConfig = {
       enabled: true,
     },
   },
+  server: {
+    cleartext: true,
+    allowNavigation: ['https://localhost:8080/'],
+  },
 };
 
 export default config;

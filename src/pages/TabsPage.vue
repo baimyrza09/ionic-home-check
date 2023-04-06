@@ -17,7 +17,7 @@
         </ion-tab-button>
 
         <ion-tab-button tab="tab3" href="/tab3">
-          <ion-icon aria-hidden="true" :icon="fileTrayFullOutline" />
+          <ion-icon aria-hidden="true" :icon="timeOutline" />
           <ion-label>Tab 3</ion-label>
         </ion-tab-button>
 
@@ -49,7 +49,7 @@ import {
   IonMenuToggle,
   IonContent,
 } from '@ionic/vue';
-import { listCircleOutline, fileTrayFullOutline, listOutline } from 'ionicons/icons';
+import { listCircleOutline, timeOutline, listOutline } from 'ionicons/icons';
 </script>
 
 <style scoped>

@@ -1,5 +1,15 @@
 <template>
   <ion-page class="ion-padding-horizontal ion-padding-bottom ion-justify-content-center">
+    <div class="header ion-justify-content-between">
+      <div class="header_start">
+        <ion-icon class="avatar" size="large" :icon="personCircle"></ion-icon>
+
+        <h3 class="ion-no-margin">Добрый день !</h3>
+      </div>
+      <ion-button size="small" color="dark" fill="clear">
+        <ion-icon class="logout" :icon="logOutOutline"></ion-icon>
+      </ion-button>
+    </div>
     <div class="ion-text-center">
       <vue3-otp-input
         v-model:value="bindValue"
@@ -13,6 +23,7 @@
         :placeholder="['', '', '', '']"
         @on-complete="handleOnComplete"
       />
+
       <ion-grid>
         <ion-row>
           <ion-col size="4" size-md="4" size-lg="4"
@@ -43,14 +54,14 @@
             ><ion-button class="custom-btn" color="light" @click="appendToDisplay('9')">9</ion-button></ion-col
           >
           <ion-col size="4" size-md="4" size-lg="4">
-            <ion-button color="dark" fill="clear">
-              <ion-icon slot="icon-only" :icon="fingerPrintOutline"></ion-icon> </ion-button
+            <ion-button class="backspace" color="dark" fill="clear">
+              <ion-icon slot="icon-only" size="large" :icon="fingerPrintOutline"></ion-icon> </ion-button
           ></ion-col>
           <ion-col size="4" size-md="4" size-lg="4"
             ><ion-button class="custom-btn" color="light" @click="appendToDisplay('0')">0</ion-button></ion-col
           >
           <ion-col size="4" size-md="4" size-lg="4">
-            <ion-button color="light" @click="backspaceBtn">
+            <ion-button class="backspace" color="light" @click="backspaceBtn">
               <ion-icon slot="icon-only" :icon="backspace"></ion-icon>
             </ion-button>
           </ion-col>
@@ -62,7 +73,7 @@
 
 <script lang="ts">
 import { IonPage, loadingController, IonButton, IonIcon, IonGrid, IonCol, IonRow } from '@ionic/vue';
-import { fingerPrintOutline, backspace } from 'ionicons/icons';
+import { fingerPrintOutline, backspace, personCircle, logOutOutline } from 'ionicons/icons';
 import { computed, defineComponent, onMounted, ref, unref } from 'vue';
 import { useIonRouter } from '@ionic/vue';
 import { NativeBiometric, AvailableResult } from 'capacitor-native-biometric';
@@ -84,9 +95,7 @@ export default defineComponent({
     });
 
     const appendToDisplay = (char: string) => {
-      if (bindValue.value.length === 4) {
-        return;
-      }
+      if (bindValue.value.length === 4) return;
       bindValue.value += char;
       console.log(bindValue.value);
     };
@@ -156,23 +165,47 @@ export default defineComponent({
       bindValue,
       fingerPrintOutline,
       backspace,
+      personCircle,
+      logOutOutline,
     };
   },
 });
 </script>
 
 <style scoped>
+.header {
+  margin-bottom: 4rem;
+  display: flex;
+}
+
+.header_start {
+  display: flex;
+}
+
+.logout {
+  font-size: 1.6rem;
+}
+
+.avatar {
+  margin-right: 2px;
+}
+
 .otp-password {
   margin-bottom: 50px;
 }
 
 ion-button {
   --border-radius: 50%;
-  width: 4.5rem;
-  height: 4.5rem;
 }
 
 ion-button.custom-btn {
   font-size: 2rem;
+  width: 4.8rem;
+  height: 4.8rem;
+}
+
+ion-button.backspace {
+  width: 4.8rem;
+  height: 4.8rem;
 }
 </style>

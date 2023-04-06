@@ -164,15 +164,15 @@ export default defineComponent({
 
 <style scoped>
 .otp-input {
-  width: 3.5rem;
-  height: 3.5rem;
+  width: 3.8rem;
+  height: 4rem;
   padding: 5px;
   margin: 0 10px;
   font-size: 20px;
   border-radius: 4px;
   border: 1px solid #f6f6f6;
   text-align: center;
-  background: #f6f6f6;
+  background: #f5f5f5;
 }
 .otp-input.is-complete {
   background-color: #e4e4e4;

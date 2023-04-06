@@ -18,12 +18,9 @@ const routes: Array<RouteRecordRaw> = [
     },
   },
   {
-    path: '/pincode',
-    name: 'pincode',
+    path: '/pinCode',
+    name: 'pinCode',
     component: FeatureAuthByPinCode,
-    meta: {
-      middleware: [guest],
-    },
   },
   {
     path: '/',
