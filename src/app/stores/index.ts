@@ -5,11 +5,13 @@ export const userStore = defineStore('user', {
   state: () => {
     return {
       authorized: false,
+      authorizedPin: false,
       claim: null,
     };
   },
   getters: {
     isAuthorized: (state) => state.authorized,
+    isAuthorizedPin: (state) => state.authorizedPin,
     claimSub: (state) => state.claim,
   },
 

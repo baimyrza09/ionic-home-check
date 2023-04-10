@@ -6,6 +6,8 @@ import FeatureAuthByLoginAndPassword from '@/features/auth/index.vue';
 import FeatureAuthByPinCode from '@/features/pin-code/index.vue';
 import guest from '@/app/middleware/guest';
 import auth from '@/app/middleware/auth';
+import pincode from '@/app/middleware/pincode';
+
 import middlewarePipeline from '@/app/middleware/middleware-pipline';
 
 const routes: Array<RouteRecordRaw> = [
@@ -21,6 +23,9 @@ const routes: Array<RouteRecordRaw> = [
     path: '/pinCode',
     name: 'pinCode',
     component: FeatureAuthByPinCode,
+    meta: {
+      middleware: [pincode],
+    },
   },
   {
     path: '/',

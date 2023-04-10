@@ -42,7 +42,6 @@ import { NativeBiometric, AvailableResult, Credentials } from 'capacitor-native-
 import { login } from '@/shared/services/auth/service';
 import LogoSvg from '@/shared/assets/LogoSvg.vue';
 import { userStore } from '@/app/stores';
-import { SecureStoragePlugin } from 'capacitor-secure-storage-plugin';
 
 export default defineComponent({
   name: 'FeatureAuthByLoginAndPassword',
@@ -64,12 +63,8 @@ export default defineComponent({
         const res = await login(userLogin.value, userPassword.value);
         if (res) {
           store.$patch({ authorized: true });
-          const pinCode = await getPinCode('pin-code');
-          // if (!pinCode) {
-          //   console.log(pinCode);
-          //   return await router.push('/pinCode');
-          // }
-          await router.push('/tab1');
+
+          await router.push('/pinCode');
           setCredential(userLogin.value, userPassword.value);
         }
       } catch (e) {
@@ -77,10 +72,6 @@ export default defineComponent({
       } finally {
         await hideLoading();
       }
-    };
-
-    const getPinCode = async (key: string) => {
-      return localStorage.getItem(key);
     };
 
     const toggleShow = () => {

@@ -3,6 +3,10 @@
     <ion-header>
       <ion-toolbar>
         <ion-title>Мои заявки</ion-title>
+
+        <ion-buttons slot="end">
+          <ion-menu-button color="light" :auto-hide="false"></ion-menu-button>
+        </ion-buttons>
       </ion-toolbar>
     </ion-header>
     <list-skeleton v-if="loading" :rows="15" />
@@ -47,6 +51,9 @@ import {
   IonLabel,
   IonItem,
   IonPage,
+  IonMenuToggle,
+  IonMenuButton,
+  IonButtons,
 } from '@ionic/vue';
 
 import { getActiveClaims, ClaimType, ProcessStateCodes } from '@/shared/services/claims/services';
@@ -70,6 +77,8 @@ export default defineComponent({
     IonLabel,
     IonItem,
     IonPage,
+    IonMenuButton,
+    IonButtons,
   },
   setup() {
     const router = useRouter();
