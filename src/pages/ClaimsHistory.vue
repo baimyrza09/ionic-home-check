@@ -40,6 +40,7 @@ import {
   IonLabel,
   IonItem,
   IonPage,
+  onIonViewDidEnter,
 } from '@ionic/vue';
 
 import { historyForCourier, ClaimType, ProcessStateCodes } from '@/shared/services/claims/services';
@@ -69,7 +70,7 @@ export default defineComponent({
     const claimsHistory = ref<ClaimDeliveryDtoFragment[]>([]);
     const loading = ref(false);
 
-    onMounted(async () => {
+    onIonViewDidEnter(async () => {
       await getClaimsHistory();
     });
 

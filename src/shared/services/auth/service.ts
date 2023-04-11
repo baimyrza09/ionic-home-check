@@ -1,6 +1,7 @@
 import { authServiceApi } from '@/app/axios';
 import session from '@/app/providers/session';
 import { userStore } from '@/app/stores';
+import { deletePinCode, deleteFingerPrint } from '@/shared/lib/auth';
 export async function login(username: string, password: string) {
   const deviceIdHeaders = session.applyDeviceIdHeaders();
 
@@ -30,4 +31,11 @@ export async function logout() {
   const store = userStore();
   store.$patch({ authorized: false });
   return authServiceApi().get('logout');
+}
+
+export async function logoutPinCode() {
+  const store = userStore();
+  store.$patch({ authorizedPin: false });
+  await deletePinCode();
+  await deleteFingerPrint();
 }

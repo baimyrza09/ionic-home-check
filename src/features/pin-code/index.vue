@@ -7,7 +7,7 @@
 
           <h3 class="ion-no-margin">Добрый день !</h3>
         </div>
-        <ion-button size="small" color="dark" fill="clear">
+        <ion-button size="small" color="dark" fill="clear" @click="signOutPinCode">
           <ion-icon class="logout" :icon="logOutOutline"></ion-icon>
         </ion-button>
       </div>
@@ -64,13 +64,13 @@
           >
           <ion-col size="4" size-md="4" size-lg="4">
             <template v-if="isPinCode">
-              <ion-button class="backspace" color="dark" fill="clear">
+              <ion-button class="backspace" color="dark" fill="clear" @click="checkCredential">
                 <ion-icon slot="icon-only" size="large" :icon="fingerPrintOutline"></ion-icon>
               </ion-button>
             </template>
             <template v-else>
               <div class="finger-box">
-                <ion-button fill="clear" color="dark"> Отмена </ion-button>
+                <ion-button fill="clear" color="dark" @click="cancelPinCode"> Отмена </ion-button>
               </div>
             </template>
           </ion-col>
@@ -87,7 +87,8 @@
     </div>
 
     <ion-modal
-      :is-open="isOpen"
+      class="wrong-pin"
+      :is-open="isOpenWrongPin"
       :backdrop-dismiss="false"
       :initial-breakpoint="0.8"
       :breakpoints="[0, 0.25, 0.5, 0.75]"
@@ -108,6 +109,34 @@
         </div>
       </ion-content>
     </ion-modal>
+
+    <ion-modal
+      ref="fingerPrintModal"
+      class="finger-print-modal"
+      :can-dismiss="canDismiss"
+      :is-open="isOpenFingerPrint"
+      :backdrop-dismiss="false"
+      :initial-breakpoint="1"
+      :breakpoints="[0]"
+    >
+      <ion-content can-dismiss="false" class="ion-padding ion-text-center">
+        <div class="modal-content">
+          <div class="ion-margin-top">
+            <h3 class="ion-margin-bottom">Быстрый вход</h3>
+            <ion-icon style="font-size: 3.5rem" color="success" :icon="fingerPrintOutline"></ion-icon>
+            <ion-text color="medium"> <h6>Использовать отпечаток пальца для быстрого входа в приложение?</h6></ion-text>
+          </div>
+          <div style="width: 100%">
+            <ion-button color="success" class="ion-text-capitalize" expand="block" @click="useFingerPrint">
+              Использовать</ion-button
+            >
+            <ion-button color="dark" class="ion-text-capitalize" fill="clear" expand="block" @click="dismiss">
+              Отмена</ion-button
+            >
+          </div>
+        </div>
+      </ion-content>
+    </ion-modal>
   </ion-page>
 </template>
 
@@ -123,16 +152,21 @@ import {
   IonText,
   IonModal,
   IonContent,
+  onIonViewDidEnter,
+  onIonViewWillEnter,
+  onIonViewWillLeave,
 } from '@ionic/vue';
 import { fingerPrintOutline, backspace, personCircle, logOutOutline } from 'ionicons/icons';
-import { defineComponent, onMounted, ref, unref, watch } from 'vue';
+import { defineComponent, onMounted, ref, watch } from 'vue';
 import { useIonRouter } from '@ionic/vue';
-import { NativeBiometric, AvailableResult } from 'capacitor-native-biometric';
+import { NativeBiometric, AvailableResult, Credentials } from 'capacitor-native-biometric';
 import { login } from '@/shared/services/auth/service';
 import { userStore } from '@/app/stores';
-import { getPinCode, setPinCode } from '@/shared/lib/auth';
+import { getPinCode, setPinCode, setFingerPrint, canUseFingerPrint, SecureStorageResponse } from '@/shared/lib/auth';
+import { logoutPinCode } from '@/shared/services/auth/service';
 
 import vue3OtpInput from '@/features/pin-code/vue3-otp-input.vue';
+
 export default defineComponent({
   name: 'FeatureAuthByPinCode',
   components: { IonPage, vue3OtpInput, IonModal, IonContent, IonButton, IonIcon, IonGrid, IonCol, IonRow, IonText },
@@ -141,15 +175,18 @@ export default defineComponent({
     const store = userStore();
 
     const bindValue = ref('');
-    const pinCode = ref<null | string>('');
+    const pinCode = ref<SecureStorageResponse | null>(null);
     const isPinCode = ref(false);
 
     const firstPinCode = ref('');
     const countErrorAttempt = ref(0);
-    const isOpen = ref(false);
+    const isOpenWrongPin = ref(false);
+    const isOpenFingerPrint = ref(false);
     const isErrorText = ref(false);
 
     const pinTitle = ref('Установить новый PIN-код');
+
+    const fingerPrintModal = ref(null);
 
     watch(
       () => bindValue.value,
@@ -166,20 +203,35 @@ export default defineComponent({
       }
     );
 
-    onMounted(async () => {
-      // checkCredential();
-      // localStorage.setItem('pin-code', '1234');
-      pinCode.value = await getPinCode('pin-code');
+    onIonViewWillEnter(async () => {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      //@ts-ignore
+      pinCode.value = await getPinCode();
       if (pinCode.value) {
         isPinCode.value = true;
-        return;
       }
+    });
+
+    onIonViewDidEnter(async () => {
+      const res = await canUseFingerPrint();
+      if (res === 'true') {
+        checkCredential();
+      }
+    });
+
+    onIonViewWillLeave(() => {
+      pinCode.value = null;
+      bindValue.value = '';
+      isErrorText.value = false;
+      firstPinCode.value = '';
+      countErrorAttempt.value = 0;
+      isPinCode.value = false;
+      pinTitle.value = 'Установить новый PIN-код';
     });
 
     const appendToDisplay = (char: string) => {
       if (bindValue.value.length === 4) return;
       bindValue.value = bindValue.value.concat(char);
-      // console.log(bindValue.value, char);
     };
 
     const backspaceBtn = () => {
@@ -187,25 +239,30 @@ export default defineComponent({
     };
 
     const checkPinCode = (enteredPinCode: string) => {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      //@ts-ignore
       if (enteredPinCode === pinCode.value) {
+        isErrorText.value = false;
         return loginKeyClock();
       }
 
       bindValue.value = '';
       isErrorText.value = true;
+      firstPinCode.value = '';
+      countErrorAttempt.value = 0;
     };
 
     const handleOnComplete = (value: string) => {
       if (firstPinCode.value) {
         if (firstPinCode.value === value) {
           setPinCode(firstPinCode.value);
-          router.push('/');
+          isOpenFingerPrint.value = true;
         } else {
           isErrorText.value = true;
           countErrorAttempt.value += 1;
           bindValue.value = '';
           if (countErrorAttempt.value === 3) {
-            isOpen.value = true;
+            isOpenWrongPin.value = true;
           }
         }
         return;
@@ -216,12 +273,16 @@ export default defineComponent({
     };
 
     const clearPinCodeSetNew = () => {
-      isOpen.value = false;
+      isOpenWrongPin.value = false;
       isErrorText.value = false;
       pinTitle.value = 'Установить новый PIN-код';
       bindValue.value = '';
       firstPinCode.value = '';
       countErrorAttempt.value = 0;
+    };
+
+    const cancelPinCode = () => {
+      router.push('/');
     };
 
     const showLoading = async () => {
@@ -237,11 +298,21 @@ export default defineComponent({
     const hideLoading = async () => {
       await loadingController.dismiss();
     };
+    const getCredential = async (): Promise<Credentials> => {
+      // Get user's credentials
+      return await NativeBiometric.getCredentials({
+        server: 'server',
+      });
+    };
 
     const loginKeyClock = async () => {
       try {
         await showLoading();
 
+        const credentials = getCredential();
+
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        //@ts-ignore
         const res = await login('delivery_courier', 'test');
         if (res) {
           store.$patch({ authorized: true });
@@ -260,46 +331,77 @@ export default defineComponent({
         .then((result: AvailableResult) => {
           const isAvailable = result.isAvailable;
 
-          // if (isAvailable) {
-          //   NativeBiometric.getCredentials({
-          //     server: '',
-          //   })
-          //     .then((credentials) => {
-          NativeBiometric.verifyIdentity({
-            reason: 'Вход по отпечатку пальца',
-            title: 'Приложите палец, чтобы войти в приложение',
-            subtitle: 'Scan your fingerprint',
-          })
-            .then(async () => {
-              const res = await login('delivery_courier', 'test');
-              if (res) {
-                await router.push('/');
-              }
+          if (isAvailable) {
+            NativeBiometric.getCredentials({
+              server: 'server',
             })
-            .catch((e) => {
-              alert(e);
-            });
-          // })
-          // .catch((e) => {
-          //   alert(e);
-          // });
-          // }
+              .then((credentials) => {
+                NativeBiometric.verifyIdentity({
+                  reason: 'Вход по отпечатку пальца',
+                  title: 'Приложите палец, чтобы войти в приложение',
+                  subtitle: 'Scan your fingerprint',
+                })
+                  .then(async () => {
+                    const res = await login(credentials.username, credentials.password);
+                    if (res) {
+                      await router.push('/');
+                    }
+                  })
+                  .catch((e) => {
+                    alert(e);
+                  });
+              })
+              .catch((e) => {
+                alert(e);
+              });
+          }
         })
         .catch((e) => {
           alert(e);
         });
     };
 
+    const dismiss = async () => {
+      await setFingerPrint(false);
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      //@ts-ignore
+      fingerPrintModal?.value?.$el.dismiss();
+      router.push('/');
+    };
+
+    const useFingerPrint = async () => {
+      await setFingerPrint(true);
+      isOpenFingerPrint.value = false;
+      router.push('/');
+    };
+
+    const canDismiss = (data: any, role?: string) => {
+      return role !== 'gesture';
+    };
+
+    const signOutPinCode = () => {
+      logoutPinCode();
+      router.push('/auth');
+    };
+
     return {
+      checkCredential,
       appendToDisplay,
       backspaceBtn,
       handleOnComplete,
       clearPinCodeSetNew,
+      signOutPinCode,
+      cancelPinCode,
+      dismiss,
+      canDismiss,
+      useFingerPrint,
       bindValue,
       isPinCode,
       pinTitle,
-      isOpen,
+      isOpenWrongPin,
       isErrorText,
+      isOpenFingerPrint,
+      fingerPrintModal,
       fingerPrintOutline,
       backspace,
       personCircle,
@@ -362,8 +464,12 @@ ion-button.backspace {
   height: 4.8rem;
 }
 
-ion-modal {
+ion-modal.wrong-pin {
   --height: 35%;
+}
+
+ion-modal.finger-print-modal {
+  --height: 50%;
 }
 
 .modal-content {

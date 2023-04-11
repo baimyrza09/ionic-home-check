@@ -3,7 +3,7 @@
     <ion-header>
       <ion-toolbar>
         <ion-buttons slot="start">
-          <ion-back-button default-href="#" @click="goBack"></ion-back-button>
+          <ion-back-button text="" default-href="#" @click="goBack"></ion-back-button>
         </ion-buttons>
         <ion-title>Детали заявки</ion-title>
       </ion-toolbar>
@@ -176,7 +176,8 @@ import {
   IonTextarea,
   IonImg,
   IonList,
-  IonCard,
+  onIonViewDidEnter,
+  onIonViewDidLeave,
   IonContent,
 } from '@ionic/vue';
 import { computed, defineComponent, onMounted, onUnmounted, ref, watch } from 'vue';
@@ -265,7 +266,7 @@ export default defineComponent({
       }
     );
 
-    onMounted(async () => {
+    onIonViewDidEnter(async () => {
       await getClaim();
       if (!claim.value) {
         return;
@@ -273,7 +274,7 @@ export default defineComponent({
       unsubscribe.value = await listenClaim(claim?.value?.id);
     });
 
-    onUnmounted(() => {
+    onIonViewDidLeave(() => {
       if (!unsubscribe.value) return;
       unsubscribe.value();
     });

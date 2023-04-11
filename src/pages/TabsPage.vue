@@ -1,6 +1,6 @@
 <template>
   <ion-page>
-    <ion-menu side="end" class="custom" content-id="main-content" @>
+    <ion-menu side="end" class="custom" content-id="main-content">
       <ion-content class="ion-text-center">
         <ion-button color="dark" fill="clear" @click="signOut">
           <ion-icon size="large" class="logout" :icon="logOutOutline"></ion-icon>
@@ -18,20 +18,18 @@
 
           <ion-tab-button tab="tab2" href="/tab2">
             <ion-icon aria-hidden="true" :icon="listCircleOutline" />
-            <ion-label>Tab 2</ion-label>
+            <ion-label>Все заявки</ion-label>
           </ion-tab-button>
 
           <ion-tab-button tab="tab3" href="/tab3">
             <ion-icon aria-hidden="true" :icon="timeOutline" />
-            <ion-label>Tab 3</ion-label>
+            <ion-label>История</ion-label>
           </ion-tab-button>
 
-          <!--        <ion-menu-toggle>-->
-          <!--          <ion-tab-button disabled tab="tab4" href="#" fill="clear">-->
-          <!--            <ion-icon aria-hidden="true" :icon="fileTrayFullOutline" />-->
-          <!--            <ion-label>Tab 3</ion-label>-->
-          <!--          </ion-tab-button>-->
-          <!--        </ion-menu-toggle>-->
+          <ion-tab-button tab="tab4" href="#" fill="clear" @click="toggleMenu">
+            <ion-icon aria-hidden="true" :icon="menuOutline" />
+            <ion-label>Меню</ion-label>
+          </ion-tab-button>
         </ion-tab-bar>
       </ion-tabs>
     </ion-page>
@@ -51,10 +49,11 @@ import {
   IonButton,
   IonContent,
 } from '@ionic/vue';
-import { listCircleOutline, timeOutline, listOutline, logOutOutline } from 'ionicons/icons';
+import { menuController } from '@ionic/vue';
+import { listCircleOutline, timeOutline, listOutline, logOutOutline, menuOutline } from 'ionicons/icons';
 import { useIonRouter } from '@ionic/vue';
 
-import { defineComponent } from 'vue';
+import { defineComponent, onUnmounted } from 'vue';
 import { logout } from '@/shared/services/auth/service';
 
 export default defineComponent({
@@ -73,14 +72,20 @@ export default defineComponent({
   },
   setup() {
     const router = useIonRouter();
+
     const signOut = async () => {
       try {
+        await menuController.close();
         await logout();
       } catch (e) {
-        await router.push('auth');
+        await router.replace('/pinCode');
       }
     };
-    return { signOut, listCircleOutline, timeOutline, listOutline, logOutOutline };
+
+    const toggleMenu = async () => {
+      await menuController.toggle();
+    };
+    return { signOut, toggleMenu, listCircleOutline, timeOutline, listOutline, logOutOutline, menuOutline };
   },
 });
 </script>

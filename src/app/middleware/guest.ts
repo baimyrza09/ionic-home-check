@@ -5,7 +5,7 @@ import { getPinCode } from '@/shared/lib/auth';
 //@ts-ignore
 export default async function guest({ next }) {
   const store = userStore();
-  const pinCode = await getPinCode('pin-code');
+  const pinCode = await getPinCode();
   if (pinCode) {
     return next({
       path: 'pinCode',

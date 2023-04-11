@@ -13,6 +13,7 @@
       maxlength="1"
       autocomplete="off"
       pattern="[0-9]"
+      readonly="readonly"
       class="otp-input"
       :class="[inputClasses, conditionalClass, { 'is-complete': model }]"
       @input="handleOnChange"

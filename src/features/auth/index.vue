@@ -4,13 +4,13 @@
       <div class="ion-text-center ion-margin-bottom ion-padding-bottom"><logo-svg /></div>
       <span class="sign-in-text">Вход</span>
       <ion-item lines="none" class="ion-margin-vertical item-has-focus ion-touched">
-        <ion-input v-model="userLogin" required class="custom" type="text" placeholder="Логин"></ion-input>
+        <ion-input v-model.trim="userLogin" required class="custom" type="text" placeholder="Логин"></ion-input>
         <ion-note slot="error">Invalid email</ion-note>
       </ion-item>
 
       <ion-item lines="none">
         <ion-input
-          v-model="userPassword"
+          v-model.trim="userPassword"
           required
           class="custom"
           :type="showPsw ? 'text' : 'password'"

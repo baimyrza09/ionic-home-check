@@ -42,7 +42,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, ref, watch } from 'vue';
+import { defineComponent, onMounted, onUnmounted, ref, watch } from 'vue';
 import {
   IonContent,
   IonList,
@@ -56,7 +56,9 @@ import {
   IonPage,
   IonRefresher,
   IonRefresherContent,
+  onIonViewDidEnter,
 } from '@ionic/vue';
+
 import { getClaimsForCourier, getDistricts, ClaimType, ProcessStateCodes } from '@/shared/services/claims/services';
 import { ClaimDtoFragment, DistrictsDtoFragment } from '@/app/graphql';
 import { useRouter } from 'vue-router';
@@ -95,7 +97,7 @@ export default defineComponent({
       }
     );
 
-    onMounted(async () => {
+    onIonViewDidEnter(async () => {
       await getAllClaims();
       await getDistrictsList();
     });
