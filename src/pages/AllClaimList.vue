@@ -14,7 +14,9 @@
         <ion-item>
           <ion-select
             v-model="selectedDist"
+            aria-label="Районы"
             placeholder="Районы"
+            label-placement="floating"
             :compare-with="compareWith"
             @ionChange="selectedDist = $event.detail.value"
           >

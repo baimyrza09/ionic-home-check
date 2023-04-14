@@ -7,7 +7,7 @@
 
           <h3 class="ion-no-margin">Добрый день !</h3>
         </div>
-        <ion-button size="small" color="dark" fill="clear" @click="signOutPinCode">
+        <ion-button size="small" color="dark" fill="clear" @click="isOpenLogOutModal = true">
           <ion-icon class="logout" :icon="logOutOutline"></ion-icon>
         </ion-button>
       </div>
@@ -88,9 +88,10 @@
 
     <ion-modal
       class="wrong-pin"
+      :can-dismiss="canDismiss"
       :is-open="isOpenWrongPin"
       :backdrop-dismiss="false"
-      :initial-breakpoint="0.8"
+      :initial-breakpoint="1"
       :breakpoints="[0, 0.25, 0.5, 0.75]"
     >
       <ion-content class="ion-padding ion-text-center">
@@ -101,9 +102,43 @@
               <h6>Предлегаем установаить новый PIN-код, запомните его и подтвердите</h6></ion-text
             >
           </div>
-          <div style="width: 100%">
+          <div class="modal-button-box">
             <ion-button color="negative" class="ion-text-capitalize" expand="block" @click="clearPinCodeSetNew">
               Продолжить</ion-button
+            >
+          </div>
+        </div>
+      </ion-content>
+    </ion-modal>
+
+    <ion-modal
+      class="logout-modal"
+      :can-dismiss="canDismiss"
+      :is-open="isOpenLogOutModal"
+      :backdrop-dismiss="false"
+      :initial-breakpoint="1"
+      :breakpoints="[0, 0.25, 0.5, 0.75]"
+    >
+      <ion-content class="ion-padding ion-text-center">
+        <div class="modal-content">
+          <div class="ion-margin-top">
+            <h3 class="ion-no-margin">Выйти из аккаунта?</h3>
+            <ion-text color="medium">
+              <h6>Сброситься быстрый вход, следющий вход будет по логину / паролю</h6></ion-text
+            >
+          </div>
+          <div class="modal-button-box">
+            <ion-button color="negative" class="ion-text-capitalize" expand="block" @click="signOutPinCode">
+              Выйти</ion-button
+            >
+            <ion-button
+              color="dark"
+              class="ion-text-capitalize"
+              fill="clear"
+              expand="block"
+              @click="isOpenLogOutModal = false"
+            >
+              Отмена</ion-button
             >
           </div>
         </div>
@@ -117,7 +152,7 @@
       :is-open="isOpenFingerPrint"
       :backdrop-dismiss="false"
       :initial-breakpoint="1"
-      :breakpoints="[0]"
+      :breakpoints="[0, 0.25, 0.5, 0.75]"
     >
       <ion-content can-dismiss="false" class="ion-padding ion-text-center">
         <div class="modal-content">
@@ -126,7 +161,7 @@
             <ion-icon style="font-size: 3.5rem" color="success" :icon="fingerPrintOutline"></ion-icon>
             <ion-text color="medium"> <h6>Использовать отпечаток пальца для быстрого входа в приложение?</h6></ion-text>
           </div>
-          <div style="width: 100%">
+          <div class="modal-button-box">
             <ion-button color="success" class="ion-text-capitalize" expand="block" @click="useFingerPrint">
               Использовать</ion-button
             >
@@ -154,10 +189,10 @@ import {
   IonContent,
   onIonViewDidEnter,
   onIonViewWillEnter,
-  onIonViewWillLeave,
+  onIonViewDidLeave,
 } from '@ionic/vue';
 import { fingerPrintOutline, backspace, personCircle, logOutOutline } from 'ionicons/icons';
-import { defineComponent, onMounted, ref, watch } from 'vue';
+import { defineComponent, ref, watch } from 'vue';
 import { useIonRouter } from '@ionic/vue';
 import { NativeBiometric, AvailableResult, Credentials } from 'capacitor-native-biometric';
 import { login } from '@/shared/services/auth/service';
@@ -182,6 +217,7 @@ export default defineComponent({
     const countErrorAttempt = ref(0);
     const isOpenWrongPin = ref(false);
     const isOpenFingerPrint = ref(false);
+    const isOpenLogOutModal = ref(false);
     const isErrorText = ref(false);
 
     const pinTitle = ref('Установить новый PIN-код');
@@ -191,12 +227,15 @@ export default defineComponent({
     watch(
       () => bindValue.value,
       (pinCode) => {
+        // instanse?.proxy?.$forceUpdate();
         if (!isPinCode.value) {
+          console.log('not pincode');
           if (pinCode.length === 4) {
             handleOnComplete(pinCode);
           }
           return;
         }
+        console.log('pincode');
         if (pinCode.length === 4) {
           checkPinCode(pinCode);
         }
@@ -219,7 +258,7 @@ export default defineComponent({
       }
     });
 
-    onIonViewWillLeave(() => {
+    onIonViewDidLeave(() => {
       pinCode.value = null;
       bindValue.value = '';
       isErrorText.value = false;
@@ -347,13 +386,9 @@ export default defineComponent({
                       await router.push('/');
                     }
                   })
-                  .catch((e) => {
-                    alert(e);
-                  });
+                  .catch();
               })
-              .catch((e) => {
-                alert(e);
-              });
+              .catch();
           }
         })
         .catch((e) => {
@@ -380,6 +415,7 @@ export default defineComponent({
     };
 
     const signOutPinCode = () => {
+      isOpenLogOutModal.value = false;
       logoutPinCode();
       router.push('/auth');
     };
@@ -402,6 +438,7 @@ export default defineComponent({
       isErrorText,
       isOpenFingerPrint,
       fingerPrintModal,
+      isOpenLogOutModal,
       fingerPrintOutline,
       backspace,
       personCircle,
@@ -465,11 +502,15 @@ ion-button.backspace {
 }
 
 ion-modal.wrong-pin {
-  --height: 35%;
+  --height: 30%;
+}
+
+ion-modal.logout-modal {
+  --height: 33%;
 }
 
 ion-modal.finger-print-modal {
-  --height: 50%;
+  --height: 45%;
 }
 
 .modal-content {
@@ -477,5 +518,12 @@ ion-modal.finger-print-modal {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
+}
+
+.modal-button-box {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: end;
 }
 </style>

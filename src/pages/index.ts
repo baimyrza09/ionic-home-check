@@ -29,14 +29,19 @@ const routes: Array<RouteRecordRaw> = [
   },
   {
     path: '/',
+    redirect: '/tabs/tab1',
+  },
+  {
+    path: '/tabs/',
     component: TabsPage,
     meta: {
       middleware: [auth],
     },
+
     children: [
       {
         path: '',
-        redirect: '/tab1',
+        redirect: 'tab1',
       },
       {
         path: 'tab1',

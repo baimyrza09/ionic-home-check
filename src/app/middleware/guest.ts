@@ -6,14 +6,15 @@ import { getPinCode } from '@/shared/lib/auth';
 export default async function guest({ next }) {
   const store = userStore();
   const pinCode = await getPinCode();
-  if (pinCode) {
+  if (!pinCode && store.isAuthorized && !session.isUserSessionExpiresExpired()) {
     return next({
-      path: 'pinCode',
+      path: '/',
     });
   }
+
   if (store.isAuthorized && !session.isUserSessionExpiresExpired()) {
     return next({
-      path: 'pinCode',
+      path: '/pinCode',
     });
   }
 

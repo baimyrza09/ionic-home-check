@@ -9,19 +9,18 @@
       </ion-toolbar>
     </ion-header>
 
-    <list-skeleton v-if="loadingSuccess && !claim" :rows="15" />
-    <ion-content v-else>
-      <!--      <ion-card>-->
-      <ion-list lines="none">
+    <detail-skeleton v-if="loading" />
+    <ion-content v-if="!loading" color="light">
+      <ion-list lines="none" inset class="custom-list">
         <ion-item>
           <ion-label>
             <h3 class="text-weight-bold">Данные клиента</h3>
           </ion-label>
 
-          <ion-label>
-            <h3 :class="getStateColor">
+          <ion-label class="ion-text-wrap">
+            <IonBadge :class="getStateColor" style="white-space: pre-wrap">
               {{ claim?.state?.stateDescription }}
-            </h3>
+            </IonBadge>
           </ion-label>
         </ion-item>
 
@@ -29,7 +28,7 @@
           <ion-label>
             <p class="text-grey-6">ФИО:</p>
           </ion-label>
-          <ion-label>
+          <ion-label class="ion-text-wrap">
             <h3>{{ claim?.fullName }}</h3>
           </ion-label>
         </ion-item>
@@ -60,7 +59,9 @@
             <h3>{{ claim?.mobileNumber }}</h3>
           </ion-label>
         </ion-item>
+      </ion-list>
 
+      <ion-list lines="none" inset class="custom-list">
         <ion-item>
           <ion-label>
             <h3 class="text-weight-bold">Данные о доставке</h3>
@@ -80,7 +81,7 @@
           <ion-label>
             <p class="text-grey-6">Филиал:</p>
           </ion-label>
-          <ion-label>
+          <ion-label class="ion-text-wrap">
             <h3>{{ claim?.branchName }}</h3>
           </ion-label>
         </ion-item>
@@ -89,13 +90,13 @@
           <ion-label>
             <p class="text-grey-6">Адрес доставки:</p>
           </ion-label>
-          <ion-label>
+          <ion-label class="ion-text-wrap">
             <h3>{{ claim?.deliveryAddress }}</h3>
           </ion-label>
         </ion-item>
 
         <ion-item>
-          <ion-label>
+          <ion-label class="ion-text-wrap">
             <p class="text-grey-6">Желаемое время доставки:</p>
           </ion-label>
           <ion-label>
@@ -111,53 +112,49 @@
 
         <div v-if="isShowPhotoBtn" class="ion-text-center">
           <ion-button type="submit" color="success" @click="takePicture">Загрузить фото</ion-button>
-          <!--            <ion-button type="submit" color="negative" @click="toast">Toast</ion-button>-->
         </div>
 
         <ion-item v-if="imageBase64" class="ion-margin-top">
           <ion-img class="rounded-borders" :src="`data:image/png;base64,${imageBase64}`" />
         </ion-item>
+      </ion-list>
 
-        <div class="ion-margin-top ion-margin-bottom ion-text-center">
-          <ion-button v-if="!isActiveClaim" color="success" @click="takeClaim">Взять в работу</ion-button>
+      <div class="ion-margin-top ion-margin-bottom ion-text-center">
+        <ion-button v-if="!isActiveClaim" color="success" @click="takeClaim">Взять в работу</ion-button>
 
-          <ion-button v-if="isClaimWasTakenByCourier" color="success" @click="arrivedAtBranch"
-            >Подтвердить доставку</ion-button
+        <ion-button v-if="isClaimWasTakenByCourier" color="success" @click="arrivedAtBranch"
+          >Подтвердить доставку</ion-button
+        >
+
+        <ion-button
+          v-if="isClaimWasTakenByCourier"
+          color="negative"
+          :loading="loading"
+          padding="5px 15px"
+          @click="refuseDelivery"
+          >Отменить доставку</ion-button
+        >
+
+        <div>
+          <ion-button
+            v-if="isCardAwaitingCardDelivery"
+            icon="close"
+            type="submit"
+            color="negative"
+            @click="completeCardDelivery(false)"
+            >Не доставлена</ion-button
           >
 
           <ion-button
-            v-if="isClaimWasTakenByCourier"
-            color="negative"
-            :loading="loadingFail"
-            :disable="disableFail"
-            padding="5px 15px"
-            @click="refuseDelivery"
-            >Отменить доставку</ion-button
+            v-if="isCardAwaitingCardDelivery"
+            color="success"
+            icon="done"
+            :loading="loading"
+            @click="completeCardDelivery(true)"
+            >Доставлена</ion-button
           >
-
-          <div>
-            <ion-button
-              v-if="isCardAwaitingCardDelivery"
-              icon="close"
-              type="submit"
-              color="negative"
-              @click="completeCardDelivery(false)"
-              >Не доставлена</ion-button
-            >
-
-            <ion-button
-              v-if="isCardAwaitingCardDelivery"
-              color="success"
-              icon="done"
-              :disable="disableSuccess"
-              :loading="loadingSuccess"
-              @click="completeCardDelivery(true)"
-              >Доставлена</ion-button
-            >
-          </div>
         </div>
-      </ion-list>
-      <!--      </ion-card>-->
+      </div>
     </ion-content>
   </ion-page>
 </template>
@@ -176,11 +173,12 @@ import {
   IonTextarea,
   IonImg,
   IonList,
-  onIonViewDidEnter,
-  onIonViewDidLeave,
   IonContent,
+  IonBadge,
+  onIonViewWillEnter,
+  onIonViewDidLeave,
 } from '@ionic/vue';
-import { computed, defineComponent, onMounted, onUnmounted, ref, watch } from 'vue';
+import { computed, defineComponent, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { Camera, CameraResultType } from '@capacitor/camera';
 import {
@@ -195,14 +193,14 @@ import { showNotification, showDialog } from '@/shared/lib/use-dialog';
 import { getClaimDetails } from '@/shared/services/claims/services';
 import { ClaimDtoDetailsFragment } from '@/app/graphql';
 
-import ListSkeleton from '@/shared/ui/skeleton/ListSkeleton.vue';
+import DetailSkeleton from '@/shared/ui/skeleton/DetailSkeleton.vue';
 import { listenClaim } from '@/shared/services/subscriptions/service';
 import { userStore } from '@/app/stores';
 
 export default defineComponent({
   name: 'ClaimDetails',
   components: {
-    ListSkeleton,
+    DetailSkeleton,
     IonItem,
     IonPage,
     IonButton,
@@ -215,8 +213,8 @@ export default defineComponent({
     IonTextarea,
     IonImg,
     IonList,
-    // IonCard,
     IonContent,
+    IonBadge,
   },
   setup() {
     const route = useRoute();
@@ -225,11 +223,7 @@ export default defineComponent({
     const claim = ref<ClaimDtoDetailsFragment | null>(null);
     const photo = ref<File>();
     const comment = ref('');
-    const loadingSuccess = ref(false);
-    const loadingFail = ref(false);
-
-    const disableSuccess = ref(false);
-    const disableFail = ref(false);
+    const loading = ref(false);
 
     const imageBase64 = ref('');
 
@@ -266,7 +260,7 @@ export default defineComponent({
       }
     );
 
-    onIonViewDidEnter(async () => {
+    onIonViewWillEnter(async () => {
       await getClaim();
       if (!claim.value) {
         return;
@@ -281,12 +275,12 @@ export default defineComponent({
 
     const getClaim = async () => {
       try {
-        loadingSuccess.value = true;
+        loading.value = true;
         claim.value = await getClaimDetails(Number(route.params.id));
       } catch (e: any) {
         await showDialog();
       } finally {
-        loadingSuccess.value = false;
+        loading.value = false;
       }
     };
 
@@ -295,7 +289,7 @@ export default defineComponent({
         return;
       }
       try {
-        loadingSuccess.value = true;
+        loading.value = true;
         const response = await takingCardForDelivery(claim.value?.id);
         if (!response) {
           return;
@@ -304,7 +298,7 @@ export default defineComponent({
       } catch (e: any) {
         await showDialog();
       } finally {
-        loadingSuccess.value = false;
+        loading.value = false;
       }
     };
 
@@ -313,8 +307,8 @@ export default defineComponent({
         return;
       }
       try {
-        loadingFail.value = true;
-        disableSuccess.value = true;
+        loading.value = true;
+
         const response = await refusalCardForDelivery(claim.value?.id);
         if (!response) {
           return;
@@ -323,8 +317,7 @@ export default defineComponent({
       } catch (e: any) {
         await showDialog();
       } finally {
-        loadingFail.value = false;
-        disableSuccess.value = false;
+        loading.value = false;
       }
     };
     const arrivedAtBranch = async () => {
@@ -332,8 +325,7 @@ export default defineComponent({
         return;
       }
       try {
-        loadingSuccess.value = true;
-        disableFail.value = true;
+        loading.value = true;
         const response = await arrivedAtBranchCardForDelivery(claim.value?.id);
         if (!response) {
           return;
@@ -342,8 +334,7 @@ export default defineComponent({
       } catch (e: any) {
         await showDialog();
       } finally {
-        loadingSuccess.value = false;
-        disableFail.value = false;
+        loading.value = false;
       }
     };
 
@@ -354,8 +345,7 @@ export default defineComponent({
             await showNotification('Загрузите фото клиента для завершения заказа!', 'bottom', 'negative');
             return;
           }
-          loadingSuccess.value = true;
-          disableFail.value = true;
+          loading.value = true;
           const response = await completeDelivery({
             claimId: claim.value,
             deliveryIsSuccess: isSuccess,
@@ -371,8 +361,7 @@ export default defineComponent({
             await showNotification('Напишите комментарий для завершения заказа!', 'bottom', 'negative');
             return;
           }
-          loadingFail.value = true;
-          disableSuccess.value = true;
+          loading.value = true;
           const response = await completeDelivery({
             claimId: claim.value?.id,
             comment: comment.value,
@@ -388,10 +377,7 @@ export default defineComponent({
       } catch (e: any) {
         await showDialog();
       } finally {
-        loadingSuccess.value = false;
-        disableFail.value = false;
-        loadingFail.value = false;
-        disableSuccess.value = false;
+        loading.value = false;
       }
     };
 
@@ -424,11 +410,8 @@ export default defineComponent({
       claim,
       photo,
       comment,
-      loadingSuccess,
-      loadingFail,
+      loading,
       imageBase64,
-      disableSuccess,
-      disableFail,
     };
   },
 });
@@ -445,6 +428,11 @@ ion-title {
 
 ion-back-button {
   --color: #fff;
+}
+
+.custom-list {
+  margin-left: 10px !important;
+  margin-right: 10px !important;
 }
 
 ion-card {

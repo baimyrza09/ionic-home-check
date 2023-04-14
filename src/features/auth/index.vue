@@ -4,8 +4,14 @@
       <div class="ion-text-center ion-margin-bottom ion-padding-bottom"><logo-svg /></div>
       <span class="sign-in-text">Вход</span>
       <ion-item lines="none" class="ion-margin-vertical item-has-focus ion-touched">
-        <ion-input v-model.trim="userLogin" required class="custom" type="text" placeholder="Логин"></ion-input>
-        <ion-note slot="error">Invalid email</ion-note>
+        <ion-input
+          v-model.trim="userLogin"
+          required
+          class="custom"
+          type="text"
+          aria-label="Логин"
+          placeholder="Логин"
+        ></ion-input>
       </ion-item>
 
       <ion-item lines="none">
@@ -14,9 +20,9 @@
           required
           class="custom"
           :type="showPsw ? 'text' : 'password'"
+          aria-label="Пароль"
           placeholder="Пароль"
         ></ion-input>
-        <ion-note slot="error">Направильный логин или пароль</ion-note>
         <ion-icon :icon="showPsw ? eyeOutline : eyeOffOutline" @click="toggleShow"></ion-icon>
       </ion-item>
 
@@ -34,18 +40,18 @@
 </template>
 
 <script lang="ts">
-import { IonInput, IonItem, IonPage, loadingController, IonButton, IonNote, IonIcon } from '@ionic/vue';
+import { IonInput, IonItem, IonPage, loadingController, IonButton, IonIcon } from '@ionic/vue';
 import { eyeOutline, eyeOffOutline } from 'ionicons/icons';
-import { computed, defineComponent, onMounted, ref } from 'vue';
+import { computed, defineComponent, ref } from 'vue';
 import { useIonRouter } from '@ionic/vue';
-import { NativeBiometric, AvailableResult, Credentials } from 'capacitor-native-biometric';
+import { NativeBiometric } from 'capacitor-native-biometric';
 import { login } from '@/shared/services/auth/service';
 import LogoSvg from '@/shared/assets/LogoSvg.vue';
 import { userStore } from '@/app/stores';
 
 export default defineComponent({
   name: 'FeatureAuthByLoginAndPassword',
-  components: { LogoSvg, IonInput, IonItem, IonButton, IonPage, IonNote, IonIcon },
+  components: { LogoSvg, IonInput, IonItem, IonButton, IonPage, IonIcon },
   setup() {
     const router = useIonRouter();
     const store = userStore();
