@@ -17,10 +17,8 @@
             <h3 class="text-weight-bold">Данные клиента</h3>
           </ion-label>
 
-          <ion-label class="ion-text-wrap">
-            <IonBadge :class="getStateColor" style="white-space: pre-wrap">
-              {{ claim?.state?.stateDescription }}
-            </IonBadge>
+          <ion-label class="ion-text-wrap" style="font-weight: bold" :style="{ color: getStateColor }">
+            {{ claim?.state?.stateDescription }}
           </ion-label>
         </ion-item>
 
@@ -56,7 +54,9 @@
             <p class="text-grey-6">Номер телефона:</p>
           </ion-label>
           <ion-label>
-            <h3>{{ claim?.mobileNumber }}</h3>
+            <h3>
+              <a style="text-decoration: none" :href="`tel:${claim?.mobileNumber}`">{{ claim?.mobileNumber }}</a>
+            </h3>
           </ion-label>
         </ion-item>
       </ion-list>
@@ -91,7 +91,9 @@
             <p class="text-grey-6">Адрес доставки:</p>
           </ion-label>
           <ion-label class="ion-text-wrap">
-            <h3>{{ claim?.deliveryAddress }}</h3>
+            <h3>
+              {{ claim?.deliveryAddress }}
+            </h3>
           </ion-label>
         </ion-item>
 
@@ -103,16 +105,6 @@
             <h3>{{ claim?.deliveryDateTime }}</h3>
           </ion-label>
         </ion-item>
-
-        <ion-item v-if="isShowCommentField">
-          <ion-label>
-            <ion-textarea v-model="comment" ref="commentField" label="Напишите комментарий" outlined color="negative" />
-          </ion-label>
-        </ion-item>
-
-        <div v-if="isShowPhotoBtn" class="ion-text-center">
-          <ion-button type="submit" color="success" @click="takePicture">Загрузить фото</ion-button>
-        </div>
 
         <ion-item v-if="imageBase64" class="ion-margin-top">
           <ion-img class="rounded-borders" :src="`data:image/png;base64,${imageBase64}`" />
@@ -141,7 +133,7 @@
             icon="close"
             type="submit"
             color="negative"
-            @click="completeCardDelivery(false)"
+            @click="openModal(false)"
             >Не доставлена</ion-button
           >
 
@@ -150,7 +142,7 @@
             color="success"
             icon="done"
             :loading="loading"
-            @click="completeCardDelivery(true)"
+            @click="openModal(true)"
             >Доставлена</ion-button
           >
         </div>
@@ -170,32 +162,32 @@ import {
   IonToolbar,
   IonHeader,
   IonLabel,
-  IonTextarea,
   IonImg,
   IonList,
   IonContent,
-  IonBadge,
   onIonViewWillEnter,
   onIonViewDidLeave,
+  modalController,
 } from '@ionic/vue';
+import { useIonRouter } from '@ionic/vue';
+
 import { computed, defineComponent, ref, watch } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import { Camera, CameraResultType } from '@capacitor/camera';
+import { useRoute } from 'vue-router';
+
 import {
   arrivedAtBranchCardForDelivery,
-  completeDelivery,
   ProcessStateCodes,
   refusalCardForDelivery,
   takingCardForDelivery,
 } from '@/shared/services/claims/services';
-import { showNotification, showDialog } from '@/shared/lib/use-dialog';
-
 import { getClaimDetails } from '@/shared/services/claims/services';
+import { listenClaim } from '@/shared/services/subscriptions/service';
 import { ClaimDtoDetailsFragment } from '@/app/graphql';
 
-import DetailSkeleton from '@/shared/ui/skeleton/DetailSkeleton.vue';
-import { listenClaim } from '@/shared/services/subscriptions/service';
 import { userStore } from '@/app/stores';
+import { showNotification, showDialog } from '@/shared/lib/use-dialog';
+import DetailSkeleton from '@/shared/ui/skeleton/DetailSkeleton.vue';
+import DeliveryConfirmDialog from '@/features/delivery-confirm-dialog/index';
 
 export default defineComponent({
   name: 'ClaimDetails',
@@ -210,19 +202,16 @@ export default defineComponent({
     IonToolbar,
     IonHeader,
     IonLabel,
-    IonTextarea,
     IonImg,
     IonList,
     IonContent,
-    IonBadge,
   },
   setup() {
     const route = useRoute();
-    const router = useRouter();
+    const router = useIonRouter();
     const store = userStore();
     const claim = ref<ClaimDtoDetailsFragment | null>(null);
     const photo = ref<File>();
-    const comment = ref('');
     const loading = ref(false);
 
     const imageBase64 = ref('');
@@ -243,15 +232,8 @@ export default defineComponent({
     const isCardAwaitingCardDelivery = computed(
       () => claim?.value?.state?.processStateCode === ProcessStateCodes.AWAITING_CARD_DELIVERY
     );
-    const isShowCommentField = computed(() => {
-      return (
-        claim.value?.isActive &&
-        isActiveClaim.value &&
-        !isClaimWasTakenByCourier.value &&
-        isCardAwaitingCardDelivery.value
-      );
-    });
-    const getStateColor = computed(() => `text-${claim?.value?.state?.color} text-weight-bold`);
+
+    const getStateColor = computed(() => claim?.value?.state?.color);
 
     watch(
       () => store.claim,
@@ -272,6 +254,25 @@ export default defineComponent({
       if (!unsubscribe.value) return;
       unsubscribe.value();
     });
+
+    const openModal = async (isDelivered: boolean) => {
+      const modal = await modalController.create({
+        component: DeliveryConfirmDialog,
+        componentProps: {
+          isDelivered: isDelivered,
+          claimId: claim.value?.id,
+        },
+        breakpoints: [0.25, 0.5, 0.8, 1],
+        initialBreakpoint: 0.8,
+      });
+      await modal.present();
+
+      const { data, role } = await modal.onWillDismiss();
+
+      if (role === 'confirm') {
+        console.log('success');
+      }
+    };
 
     const getClaim = async () => {
       try {
@@ -338,57 +339,6 @@ export default defineComponent({
       }
     };
 
-    const completeCardDelivery = async (isSuccess: boolean) => {
-      try {
-        if (isSuccess) {
-          if (!imageBase64.value) {
-            await showNotification('Загрузите фото клиента для завершения заказа!', 'bottom', 'negative');
-            return;
-          }
-          loading.value = true;
-          const response = await completeDelivery({
-            claimId: claim.value,
-            deliveryIsSuccess: isSuccess,
-            photo: imageBase64.value!,
-          });
-          if (!response) {
-            return;
-          }
-          await showNotification(response.message, 'bottom', 'success');
-          router.back();
-        } else {
-          if (!comment.value) {
-            await showNotification('Напишите комментарий для завершения заказа!', 'bottom', 'negative');
-            return;
-          }
-          loading.value = true;
-          const response = await completeDelivery({
-            claimId: claim.value?.id,
-            comment: comment.value,
-            deliveryIsSuccess: isSuccess,
-          });
-          if (!response) {
-            return;
-          }
-          await showNotification(response.message, 'bottom', 'warning');
-          router.back();
-        }
-        await getClaim();
-      } catch (e: any) {
-        await showDialog();
-      } finally {
-        loading.value = false;
-      }
-    };
-
-    const takePicture = async () => {
-      const image = await Camera.getPhoto({
-        quality: 90,
-        resultType: CameraResultType.Base64,
-      });
-
-      imageBase64.value = image.base64String!;
-    };
     const goBack = () => {
       router.back();
     };
@@ -399,17 +349,14 @@ export default defineComponent({
       takeClaim,
       refuseDelivery,
       arrivedAtBranch,
-      completeCardDelivery,
-      takePicture,
+      openModal,
       isShowPhotoBtn,
       isActiveClaim,
       getStateColor,
       isClaimWasTakenByCourier,
       isCardAwaitingCardDelivery,
-      isShowCommentField,
       claim,
       photo,
-      comment,
       loading,
       imageBase64,
     };

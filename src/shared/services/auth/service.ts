@@ -30,7 +30,7 @@ export async function keepAlive() {
 export async function logout() {
   const store = userStore();
   store.$patch({ authorized: false });
-  return authServiceApi().get('logout');
+  await authServiceApi().get('logout');
 }
 
 export async function logoutPinCode() {

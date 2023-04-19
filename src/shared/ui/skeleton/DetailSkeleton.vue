@@ -1,6 +1,6 @@
 <template>
   <ion-content color="light">
-    <ion-list inset="true" lines="none">
+    <ion-list :inset="true" lines="none">
       <ion-item>
         <ion-label>
           <ion-skeleton-text :animated="true" style="width: 80%"></ion-skeleton-text>
@@ -22,7 +22,7 @@
       </ion-item>
     </ion-list>
 
-    <ion-list inset="true" lines="none">
+    <ion-list :inset="true" lines="none">
       <ion-item>
         <ion-label>
           <ion-skeleton-text :animated="true" style="width: 40%"></ion-skeleton-text>

@@ -14,7 +14,7 @@
     </ion-menu>
     <ion-page id="main-content">
       <ion-tabs>
-        <ion-router-outlet :key="$route.fullPath"></ion-router-outlet>
+        <ion-router-outlet></ion-router-outlet>
         <ion-tab-bar slot="bottom">
           <ion-tab-button tab="tab1" href="/tabs/tab1">
             <ion-icon aria-hidden="true" :icon="listOutline" />
@@ -61,6 +61,7 @@ import { menuController } from '@ionic/vue';
 
 import { listCircleOutline, timeOutline, listOutline, logOutOutline, menuOutline } from 'ionicons/icons';
 import { useIonRouter } from '@ionic/vue';
+import { useRouter } from 'vue-router';
 
 import { defineComponent, ref } from 'vue';
 import { logout } from '@/shared/services/auth/service';
@@ -82,7 +83,6 @@ export default defineComponent({
   },
   setup() {
     const router = useIonRouter();
-    const activeTab = ref('tab1');
 
     const signOut = () => {
       logout();
@@ -91,21 +91,12 @@ export default defineComponent({
 
     onIonViewDidLeave(() => menuController.close());
 
-    const selectTab = (tab: string) => {
-      console.log(tab);
-      console.log('test');
-      activeTab.value = tab;
-      router.push(tab);
-    };
-
     const toggleMenu = async () => {
       await menuController.toggle();
     };
     return {
       signOut,
       toggleMenu,
-      selectTab,
-      activeTab,
       listCircleOutline,
       timeOutline,
       listOutline,

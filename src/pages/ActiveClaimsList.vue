@@ -11,23 +11,38 @@
         <ion-refresher-content></ion-refresher-content>
       </ion-refresher>
       <ion-list :inset="true" lines="none" style="background-color: #f4f5f8 !important" class="custom-list">
-        <ion-item v-for="claim in claims" :key="claim.id" button @click="goToClaim(e, claim)">
-          <icon-status
-            :style="{
-              color: isShowDeliveryIcon(claim.state?.processStateCode),
-            }"
-            class="icon-status"
-          />
-
-          <ion-label>
-            <h3>{{ claim.fullName }}</h3>
-            <p>{{ claim.deliveryAddress }}</p>
-          </ion-label>
-
-          <ion-label slot="end" class="end-label">
-            <p>Время доставки</p>
-            <h3>{{ claim.deliveryDateTime }}</h3>
-          </ion-label>
+        <ion-item
+          v-for="claim in claims"
+          :key="claim.id"
+          class="ion-text-wrap"
+          button
+          detail="false"
+          @click="goToClaim(e, claim)"
+        >
+          <ion-grid :fixed="true">
+            <ion-row class="ion-align-items-center">
+              <ion-col size="auto" style="padding: 0">
+                <icon-status
+                  :style="{
+                    color: isShowDeliveryIcon(claim.state?.processStateCode),
+                  }"
+                  class="icon-status"
+                />
+              </ion-col>
+              <ion-col size="7" size-sm="7" size-md="7" size-lg="7" size-xs="7">
+                <ion-label>
+                  <h2 class="text-space">{{ claim.fullName }}</h2>
+                  <p>{{ claim.deliveryAddress }}</p>
+                </ion-label></ion-col
+              >
+              <ion-col size="4" size-sm="4"
+                ><ion-label class="ion-text-end">
+                  <p class="text-space">Время доставки</p>
+                  <sub>{{ claim.deliveryDateTime }}</sub>
+                </ion-label></ion-col
+              >
+            </ion-row>
+          </ion-grid>
         </ion-item>
       </ion-list>
     </ion-content>
@@ -35,7 +50,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, ref } from 'vue';
+import { defineComponent, ref } from 'vue';
 import {
   IonRefresher,
   IonRefresherContent,
@@ -47,6 +62,9 @@ import {
   IonLabel,
   IonItem,
   IonPage,
+  IonCol,
+  IonGrid,
+  IonRow,
   onIonViewDidEnter,
 } from '@ionic/vue';
 
@@ -71,6 +89,9 @@ export default defineComponent({
     IonLabel,
     IonItem,
     IonPage,
+    IonCol,
+    IonGrid,
+    IonRow,
   },
   setup() {
     const router = useRouter();
@@ -145,26 +166,24 @@ ion-title {
 ion-item {
   --background: #fff;
   --color: #000;
-
   --border-color: #fff;
   --border-style: solid;
-
   --border-radius: 10px;
-
   --detail-icon-color: white;
-
+  --inner-padding-end: 0;
   margin-bottom: 7px;
 }
 
 ion-item::part(native) {
   padding-left: 5px;
+  padding-right: 0px;
 }
 
 .icon-status {
   margin-right: 5px;
 }
 
-.end-label {
-  margin-right: 0;
+.text-space {
+  margin-bottom: 8px;
 }
 </style>

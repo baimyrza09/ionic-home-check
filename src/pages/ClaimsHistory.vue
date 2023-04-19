@@ -28,7 +28,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, ref } from 'vue';
+import { defineComponent, ref } from 'vue';
 import {
   IonRefresher,
   IonRefresherContent,
@@ -46,7 +46,7 @@ import {
 import { historyForCourier, ClaimType, ProcessStateCodes } from '@/shared/services/claims/services';
 import { ClaimDeliveryDtoFragment } from '@/app/graphql';
 
-import { useRouter } from 'vue-router';
+import { useIonRouter } from '@ionic/vue';
 import ListSkeleton from '@/shared/ui/skeleton/ListSkeleton.vue';
 
 export default defineComponent({
@@ -65,7 +65,7 @@ export default defineComponent({
     IonPage,
   },
   setup() {
-    const router = useRouter();
+    const router = useIonRouter();
 
     const claimsHistory = ref<ClaimDeliveryDtoFragment[]>([]);
     const loading = ref(false);

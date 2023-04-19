@@ -10,7 +10,7 @@
       <ion-refresher slot="fixed" @ionRefresh="handleRefresh($event)">
         <ion-refresher-content></ion-refresher-content>
       </ion-refresher>
-      <ion-list inset="true">
+      <ion-list :inset="true">
         <ion-item>
           <ion-select
             v-model="selectedDist"
@@ -44,7 +44,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, onUnmounted, ref, watch } from 'vue';
+import { defineComponent, ref, watch } from 'vue';
 import {
   IonContent,
   IonList,
@@ -63,7 +63,7 @@ import {
 
 import { getClaimsForCourier, getDistricts, ClaimType, ProcessStateCodes } from '@/shared/services/claims/services';
 import { ClaimDtoFragment, DistrictsDtoFragment } from '@/app/graphql';
-import { useRouter } from 'vue-router';
+import { useIonRouter } from '@ionic/vue';
 
 import ListSkeleton from '@/shared/ui/skeleton/ListSkeleton.vue';
 
@@ -85,7 +85,7 @@ export default defineComponent({
     IonSelectOption,
   },
   setup() {
-    const router = useRouter();
+    const router = useIonRouter();
 
     const claims = ref<ClaimDtoFragment[]>([]);
     const districts = ref<DistrictsDtoFragment[]>([]);

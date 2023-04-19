@@ -70,7 +70,7 @@ export default defineComponent({
         if (res) {
           store.$patch({ authorized: true });
 
-          await router.push('/pinCode');
+          await router.replace('/pinCode');
           setCredential(userLogin.value, userPassword.value);
         }
       } catch (e) {
@@ -100,7 +100,7 @@ export default defineComponent({
         cssClass: 'custom-loading',
       });
 
-      loading.present();
+      await loading.present();
     };
 
     const hideLoading = async () => {

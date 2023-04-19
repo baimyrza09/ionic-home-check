@@ -227,15 +227,12 @@ export default defineComponent({
     watch(
       () => bindValue.value,
       (pinCode) => {
-        // instanse?.proxy?.$forceUpdate();
         if (!isPinCode.value) {
-          console.log('not pincode');
           if (pinCode.length === 4) {
             handleOnComplete(pinCode);
           }
           return;
         }
-        console.log('pincode');
         if (pinCode.length === 4) {
           checkPinCode(pinCode);
         }
@@ -253,7 +250,7 @@ export default defineComponent({
 
     onIonViewDidEnter(async () => {
       const res = await canUseFingerPrint();
-      if (res === 'true') {
+      if (res?.value === 'true') {
         checkCredential();
       }
     });
@@ -267,15 +264,6 @@ export default defineComponent({
       isPinCode.value = false;
       pinTitle.value = 'Установить новый PIN-код';
     });
-
-    const appendToDisplay = (char: string) => {
-      if (bindValue.value.length === 4) return;
-      bindValue.value = bindValue.value.concat(char);
-    };
-
-    const backspaceBtn = () => {
-      bindValue.value = (bindValue.value + '').slice(0, -1);
-    };
 
     const checkPinCode = (enteredPinCode: string) => {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -320,8 +308,16 @@ export default defineComponent({
       countErrorAttempt.value = 0;
     };
 
+    const backspaceBtn = () => {
+      bindValue.value = (bindValue.value + '').slice(0, -1);
+    };
+
+    const appendToDisplay = (char: string) => {
+      if (bindValue.value.length === 4) return;
+      bindValue.value = bindValue.value.concat(char);
+    };
     const cancelPinCode = () => {
-      router.push('/');
+      router.replace('/');
     };
 
     const showLoading = async () => {
@@ -337,7 +333,7 @@ export default defineComponent({
     const hideLoading = async () => {
       await loadingController.dismiss();
     };
-    const getCredential = async (): Promise<Credentials> => {
+    const getCredentials = async (): Promise<Credentials> => {
       // Get user's credentials
       return await NativeBiometric.getCredentials({
         server: 'server',
@@ -347,16 +343,12 @@ export default defineComponent({
     const loginKeyClock = async () => {
       try {
         await showLoading();
+        // const credentials = await getCredentials();
 
-        const credentials = getCredential();
-
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        //@ts-ignore
         const res = await login('delivery_courier', 'test');
         if (res) {
           store.$patch({ authorized: true });
-
-          await router.push('/');
+          await router.replace('/');
         }
       } catch (e) {
         console.log();
@@ -383,7 +375,7 @@ export default defineComponent({
                   .then(async () => {
                     const res = await login(credentials.username, credentials.password);
                     if (res) {
-                      await router.push('/');
+                      await router.replace('/');
                     }
                   })
                   .catch();
@@ -401,13 +393,14 @@ export default defineComponent({
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       //@ts-ignore
       fingerPrintModal?.value?.$el.dismiss();
-      router.push('/');
+      isOpenFingerPrint.value = false;
+      router.replace('/');
     };
 
     const useFingerPrint = async () => {
       await setFingerPrint(true);
       isOpenFingerPrint.value = false;
-      router.push('/');
+      router.replace('/');
     };
 
     const canDismiss = (data: any, role?: string) => {
@@ -417,7 +410,7 @@ export default defineComponent({
     const signOutPinCode = () => {
       isOpenLogOutModal.value = false;
       logoutPinCode();
-      router.push('/auth');
+      router.replace('/auth');
     };
 
     return {
